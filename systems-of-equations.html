@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Systems of Equations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --navy:#00274C; --maize:#FFCB05; --maize-ink:#00274C;
+  --bg:#EEF2F7; --surface:#FFFFFF; --surface2:#F5F7FB; --ink:#13233A; --muted:#55657C; --rule:#D3DBE6;
+  --good:#1B7A4B; --goodbg:#E4F4EB; --bad:#B3261E; --badbg:#FCEAE8; --free:#7A5000; --freebg:#FFF3C4;
+  --gbg:#FFFFFF; --grid:#E6EBF2; --grid2:#C3CDDA; --axis:#2F3E55; --cred:#C74440; --cblue:#2D70B3; --poi:#7D8899; --halo:#FFFFFF;
+  --focus:#2D70B3;
+  box-sizing:border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#081629; --surface:#0F2340; --surface2:#132B4D; --ink:#E7EEF7; --muted:#9FB2CB; --rule:#29466B;
+    --good:#5ED39A; --goodbg:#0E3A2A; --bad:#FF948A; --badbg:#3D1A1C; --free:#FFD44D; --freebg:#3A3010;
+    --gbg:#0C1E37; --grid:#173052; --grid2:#25446C; --axis:#B7C6DA; --cred:#F07C78; --cblue:#6EAAF2; --poi:#8FA0B8; --halo:#0C1E37;
+    --focus:#FFCB05;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#081629; --surface:#0F2340; --surface2:#132B4D; --ink:#E7EEF7; --muted:#9FB2CB; --rule:#29466B;
+  --good:#5ED39A; --goodbg:#0E3A2A; --bad:#FF948A; --badbg:#3D1A1C; --free:#FFD44D; --freebg:#3A3010;
+  --gbg:#0C1E37; --grid:#173052; --grid2:#25446C; --axis:#B7C6DA; --cred:#F07C78; --cblue:#6EAAF2; --poi:#8FA0B8; --halo:#0C1E37;
+  --focus:#FFCB05;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top: env(safe-area-inset-top, 0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:17px;line-height:1.5;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navy)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+/* math */
+.m,.eq{font-family:"STIX Two Text","Cambria Math",Cambria,"Times New Roman",serif}
+.m i,.eq i{font-style:italic}
+.eq{font-size:1.45rem;line-height:1.6;white-space:nowrap}
+.m{font-size:1.12em;white-space:nowrap}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.8em;line-height:1.05;margin:0 .08em}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 .12em}
+.frac>span:last-child{padding:0 .12em}
+sup{font-size:.68em;line-height:0}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--navy);color:#fff;padding:.7rem 1rem .8rem}
+.top-inner{max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1.25rem}
+.top h1{margin:0;font-size:1.25rem;font-weight:700;letter-spacing:.01em}
+.top h1 .m{font-size:1.05em}
+.levels{display:flex;align-items:center;gap:0;overflow-x:auto;padding:.2rem .1rem;scrollbar-width:thin;flex:1 1 auto;justify-content:flex-end}
+.lv{position:relative;display:flex;align-items:center}
+.lv+.lv::before{content:"";width:14px;height:2px;background:rgba(255,255,255,.35);display:block}
+.lv button{width:38px;height:38px;border-radius:50%;border:2px solid rgba(255,255,255,.55);background:transparent;color:#fff;font-weight:700;font-size:.95rem;display:grid;place-items:center;padding:0;flex:none}
+.lv button.done{background:#fff;color:var(--navy);border-color:#fff}
+.lv button.cur{background:var(--maize);color:var(--maize-ink);border-color:var(--maize);box-shadow:0 0 0 3px rgba(255,203,5,.3)}
+.lv button.locked{opacity:.45;cursor:not-allowed}
+.lv button svg{width:16px;height:16px}
+.final-link{border:2px solid var(--maize);background:transparent;color:var(--maize);border-radius:999px;padding:.3rem .8rem;font-weight:700;font-size:.9rem;flex:none}
+
+main{max-width:1100px;margin:0 auto;padding:1.25rem 1rem 2rem}
+.lvl-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.4rem 1rem;margin-bottom:.4rem}
+.lvl-head h2{margin:0;font-size:1.45rem}
+.progress{display:flex;align-items:center;gap:.45rem;color:var(--muted);font-size:.95rem}
+.dots{display:flex;gap:.3rem}
+.dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--maize);background:transparent}
+.dot.on{background:var(--maize)}
+.instr{margin:.2rem 0 1rem;color:var(--ink);max-width:70ch}
+
+.work{display:grid;gap:1.25rem;grid-template-columns:1fr}
+.work.has-graph{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+@media (max-width:820px){.work.has-graph{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:1rem 1.1rem}
+.graph-panel{padding:.6rem}
+.graph-wrap{position:relative;width:100%;max-width:560px;margin:0 auto}
+svg.graph{width:100%;height:auto;display:block;touch-action:manipulation;border-radius:8px;background:var(--gbg);user-select:none;-webkit-user-select:none}
+.graph-tip{font-size:.9rem;color:var(--muted);text-align:center;margin:.45rem 0 .1rem}
+.algebra{max-width:640px;margin:0 auto;width:100%}
+
+.eqs{display:flex;flex-direction:column;gap:.15rem;margin:.1rem 0 .9rem;overflow-x:auto}
+.eqrow{display:flex;align-items:center;gap:.6rem}
+.swatch{width:14px;height:14px;border-radius:50%;flex:none}
+
+.answers{display:flex;flex-direction:column;gap:.6rem}
+.ans-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.ans-row label{font-weight:700;min-width:6.2em}
+input.pt{font-family:"STIX Two Text","Cambria Math",serif;font-size:1.4rem;padding:.45rem .7rem;border:2px solid var(--rule);border-radius:10px;background:var(--surface2);color:var(--ink);width:11em;max-width:100%}
+input.pt:focus{border-color:var(--cblue);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--cblue) 30%,transparent)}
+input.pt:disabled{opacity:.75}
+.linkbtn{background:none;border:none;color:var(--cblue);text-decoration:underline;padding:.2rem 0;font-weight:700}
+.linkbtn:disabled{opacity:.5;cursor:default}
+.choices{display:flex;flex-direction:column;gap:.5rem}
+.choice{display:flex;align-items:center;gap:.6rem;text-align:left;padding:.65rem .9rem;border:2px solid var(--rule);border-radius:10px;background:var(--surface2);color:var(--ink);font-weight:700}
+.choice[aria-pressed="true"]{border-color:var(--navy);background:var(--maize);color:var(--maize-ink)}
+.choice:disabled{cursor:default}
+.check{width:100%;margin-top:.8rem;padding:.75rem;border:none;border-radius:10px;background:var(--maize);color:var(--maize-ink);font-weight:700;font-size:1.08rem}
+.check:hover{filter:brightness(1.04)}
+.tip{font-size:.88rem;color:var(--muted);margin:.45rem 0 0}
+
+.keypad{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-top:.7rem;max-width:340px}
+.keypad button{padding:.55rem 0;border:1px solid var(--rule);border-radius:9px;background:var(--surface2);color:var(--ink);font-family:"STIX Two Text",serif;font-size:1.25rem}
+.keypad button:active{background:var(--rule)}
+
+.fb{margin-top:.9rem;border-radius:10px;padding:.75rem .9rem;border-left:5px solid transparent}
+.fb:empty{display:none}
+.fb.good{background:var(--goodbg);border-color:var(--good)}
+.fb.bad{background:var(--badbg);border-color:var(--bad)}
+.fb.free{background:var(--freebg);border-color:var(--free)}
+.fb .lead{font-weight:700}
+.fb.good .lead{color:var(--good)} .fb.bad .lead{color:var(--bad)} .fb.free .lead{color:var(--free)}
+.fb p{margin:.25rem 0}
+.setup{margin:.45rem 0 .2rem;padding:.5rem .7rem;background:var(--surface);border:1px dashed var(--rule);border-radius:8px}
+.steps{margin:.35rem 0 .2rem;padding-left:1.3rem}
+.steps li{margin:.25rem 0}
+.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.9rem}
+.btn{padding:.7rem 1.1rem;border-radius:10px;font-weight:700;border:2px solid var(--navy);background:var(--surface);color:var(--ink)}
+:root[data-theme="dark"] .btn{border-color:var(--rule)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn{border-color:var(--rule)}}
+.btn.go{background:var(--maize);border-color:var(--maize);color:var(--maize-ink)}
+
+details.rule{margin-top:1rem;border:1px solid var(--rule);border-radius:12px;background:var(--surface)}
+details.rule summary{padding:.65rem .9rem;font-weight:700;cursor:pointer}
+details.rule .rbody{padding:0 1rem .8rem}
+details.rule .rbody p{margin:.35rem 0}
+details.rule .rbody ol{margin:.3rem 0;padding-left:1.3rem}
+
+/* intro + final */
+.intro{min-height:60vh;display:grid;place-items:center;text-align:center}
+.intro .card{background:var(--surface);border:1px solid var(--rule);border-radius:18px;padding:2rem 1.5rem;max-width:560px}
+.intro h2{margin:.2rem 0 .6rem;font-size:1.6rem}
+.intro p{margin:.4rem 0;font-size:1.1rem}
+.final{position:fixed;inset:0;z-index:20;background:#00274C;color:#fff;overflow:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 1.5rem) 1.25rem calc(env(safe-area-inset-bottom,0px) + 1.5rem);text-align:center}
+.final svg{width:min(460px,90vw);height:auto}
+.final h2{font-family:"STIX Two Text",serif;font-weight:600;font-size:clamp(1.7rem,4.6vw,2.6rem);line-height:1.15;margin:.6rem 0 .5rem;max-width:20ch}
+.final p{font-size:1.12rem;max-width:44ch;margin:.3rem auto;color:#D6E2F0}
+.final .btn{margin-top:1.2rem;background:var(--maize);border-color:var(--maize);color:#00274C}
+
+footer{max-width:1100px;margin:0 auto;padding:1rem 1rem 2.5rem;color:var(--muted);font-size:.92rem;display:flex;flex-wrap:wrap;gap:.8rem 1.6rem;align-items:center}
+footer label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
+footer input[type=password]{font:inherit;padding:.3rem .5rem;border:1px solid var(--rule);border-radius:7px;background:var(--surface);color:var(--ink);width:10em}
+footer .small{padding:.3rem .7rem;border-radius:8px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);font-size:.9rem}
+.confirm{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;background:var(--badbg);border:1px solid var(--bad);padding:.5rem .7rem;border-radius:9px;color:var(--ink)}
+.confirm .danger{background:var(--bad);color:#fff;border:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:30;width:100%;height:100%}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-inner">
+  <h1>Systems of Equations</h1>
+  <nav class="levels" id="levels" aria-label="Levels"></nav>
+</div></header>
+<main id="main"></main>
+<footer id="foot"></footer>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div id="live" class="sr" aria-live="polite"></div>
+
+<script>
+/* =====================================================================
+   SETTINGS — every number Mr. Jackson might change lives here
+   ===================================================================== */
+const SETTINGS = {
+  passphrase: 'spiketown',          // teacher preview unlock
+  storageKey: 'systemsOfEquations.v1',
+  need: [1, 2, 2, 2, 2, 2, 2, 2, 2, 2], // first-try correct answers needed, Levels 1–10
+  triesBeforeReveal: 3,             // the worked solution shows after this many misses
+  firstTryOnly: true,               // only first-try answers count toward leveling up
+  graphRange: 10,                   // graphs show −10 to 10 on both axes
+  level2TangentChance: 0.4,         // share of Level 2 problems with exactly one solution
+  level5AllowHalves: false,         // true = Level 5 answers can include halves, like the example (1/2, 2)
+  introFireworksMs: 4000,
+  finalFireworksMs: 9000
+};
+
+const LEVELS = [
+  { name: 'Reading the intersection', short: 'reading the intersection',
+    instr: 'Use the graph to solve the system. Type the point where the lines cross as <span class="m">(<i>x</i>, <i>y</i>)</span>.' },
+  { name: 'Lines with circles and parabolas', short: 'lines with circles and parabolas',
+    instr: 'Use the graph to solve the system. Some systems have one solution and some have two: enter every point where the graphs cross.' },
+  { name: 'Substitution', short: 'substitution',
+    instr: 'No graph this time. Solve the system and type the solution as <span class="m">(<i>x</i>, <i>y</i>)</span>.' },
+  { name: 'Elimination', short: 'elimination',
+    instr: 'Solve the system by elimination and type the solution as <span class="m">(<i>x</i>, <i>y</i>)</span>.' },
+  { name: 'Elimination with a multiplier', short: 'elimination with a multiplier',
+    instr: 'No coefficient is a multiple of the one it lines up with, so multiply <b>both</b> equations, then eliminate. Type the solution as <span class="m">(<i>x</i>, <i>y</i>)</span>.' },
+  { name: 'No solution or infinitely many', short: 'no solution or infinitely many',
+    instr: 'Solve the system and choose the answer that describes its solutions.' },
+  { name: 'A line and a parabola', short: 'a line and a parabola, algebra only',
+    instr: 'No graph. Solve algebraically. This system has two solutions: type both points as <span class="m">(<i>x</i>, <i>y</i>)</span>, in either order.' },
+  { name: 'A line tangent to a parabola', short: 'a line tangent to a parabola',
+    instr: 'Solve algebraically. A line can meet a parabola twice or just once: enter every solution as <span class="m">(<i>x</i>, <i>y</i>)</span>.' },
+  { name: 'Two parabolas', short: 'two parabolas',
+    instr: 'One parabola opens up and one opens down. Solve algebraically and type both points as <span class="m">(<i>x</i>, <i>y</i>)</span>, in either order.' },
+  { name: 'Parabolas with 2x²', short: 'parabolas with 2x²',
+    instr: 'One equation starts with <span class="m">2<i>x</i><sup>2</sup></span>. Combine the <span class="m"><i>x</i><sup>2</sup></span>-terms carefully, divide out any common factor, then factor. Type both points as <span class="m">(<i>x</i>, <i>y</i>)</span>, in either order.' }
+];
+
+/* =====================================================================
+   Small helpers
+   ===================================================================== */
+const MINUS = '\u2212';
+const R = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const gcd = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a; };
+const near = (a, b) => Math.abs(a - b) < 1e-9;
+const isInt = v => Math.abs(v - Math.round(v)) < 1e-9;
+const ORD = ['first', 'second'];
+
+function fracHTML(n, d) { return `<span class="frac"><span>${n}</span><span>${d}</span></span>`; }
+function magHTML(a) { // positive number → integer or stacked fraction
+  if (isInt(a)) return '' + Math.round(a);
+  for (let d = 2; d <= 12; d++) if (isInt(a * d)) return fracHTML(Math.round(a * d), d);
+  return (+a.toFixed(3)).toString();
+}
+function fmt(v) { return (v < 0 && !near(v, 0) ? MINUS : '') + magHTML(Math.abs(v)); }
+function fmtPt(p) { return `<span class="m">(${fmt(p[0])}, ${fmt(p[1])})</span>`; }
+function m(s) { return `<span class="m">${s}</span>`; }
+function varHTML(v) { return v === 'x2' ? '<i>x</i><sup>2</sup>' : v ? `<i>${v}</i>` : ''; }
+
+/* A term list is [[coef, var], ...] where var is 'x', 'y', 'x2' or '' (constant). */
+function expr(terms) {
+  let s = '', first = true;
+  for (const [c, v] of terms) {
+    if (near(c, 0)) continue;
+    const neg = c < 0, a = Math.abs(c);
+    const body = (v === '' ? magHTML(a) : (near(a, 1) ? '' : magHTML(a))) + varHTML(v);
+    s += first ? (neg ? MINUS : '') + body : (neg ? ` ${MINUS} ` : ' + ') + body;
+    first = false;
+  }
+  return first ? '0' : s;
+}
+function valOf(v, x, y) { return v === 'x' ? x : v === 'x2' ? x * x : v === 'y' ? y : 1; }
+function evalTerms(terms, x, y) { return terms.reduce((s, [c, v]) => s + c * valOf(v, x, y), 0); }
+/* Substituted version of a term list: 2x − 1 at x = 3 → 2(3) − 1 */
+function subExpr(terms, x, y, only) {
+  let s = '', first = true;
+  for (const [c, v] of terms) {
+    if (near(c, 0)) continue;
+    const neg = c < 0, a = Math.abs(c);
+    let body;
+    const base = (v === 'x' || v === 'x2') ? 'x' : v === 'y' ? 'y' : '';
+    if (v === '' || (only && base !== only)) {
+      body = (v === '' ? magHTML(a) : (near(a, 1) ? '' : magHTML(a))) + varHTML(v);
+    } else {
+      const val = base === 'x' ? x : y;
+      const bare = near(a, 1) && v !== 'x2' && val >= 0;
+      const p = bare ? fmt(val) : `(${fmt(val)})` + (v === 'x2' ? '<sup>2</sup>' : '');
+      body = (near(a, 1) ? '' : magHTML(a)) + p;
+    }
+    s += first ? (neg ? MINUS : '') + body : (neg ? ` ${MINUS} ` : ' + ') + body;
+    first = false;
+  }
+  return first ? '0' : s;
+}
+function isConst(terms) { return terms.every(([c, v]) => v === '' || near(c, 0)); }
+function isJustY(terms) { const t = terms.filter(([c]) => !near(c, 0)); return t.length === 1 && t[0][1] === 'y' && near(t[0][0], 1); }
+
+/* ---------- equation objects ---------- */
+function mkLin(L, Rt, color) {
+  return {
+    kind: 'lin', L, R: Rt, color,
+    html: expr(L) + ' = ' + expr(Rt),
+    holds(x, y) { return near(evalTerms(L, x, y), evalTerms(Rt, x, y)); },
+    why(x, y) { // explanation of why (x, y) fails
+      const lv = evalTerms(L, x, y), rv = evalTerms(Rt, x, y);
+      if (isConst(Rt)) return m(`${subExpr(L, x, y)} = ${fmt(lv)}`) + `, not ${m(fmt(rv))}`;
+      if (isJustY(L)) return m(`${subExpr(Rt, x, y)} = ${fmt(rv)}`) + `, but <span class="m"><i>y</i> = ${fmt(y)}</span>`;
+      return `the left side is ${m(subExpr(L, x, y) + ' = ' + fmt(lv))} and the right side is ${m(subExpr(Rt, x, y) + ' = ' + fmt(rv))}`;
+    },
+    verify(x, y) { return m(`${isJustY(L) ? fmt(y) : subExpr(L, x, y)} = ${subExpr(Rt, x, y)}`); }
+  };
+}
+function binom(v, val, h) { // (val − h) shown after substitution, or (x − h) symbolic
+  const inner = val === null ? varHTML(v) : fmt(val);
+  if (h === 0) return val === null ? inner : `(${inner})`;
+  return `(${inner} ${h > 0 ? MINUS : '+'} ${Math.abs(h)})`;
+}
+function mkCircle(h, k, r2, color) {
+  const sym = binom('x', null, h) + '<sup>2</sup> + ' + binom('y', null, k) + '<sup>2</sup>';
+  return {
+    kind: 'circle', h, k, r2, color,
+    html: sym + ' = ' + r2,
+    holds(x, y) { return near((x - h) ** 2 + (y - k) ** 2, r2); },
+    why(x, y) {
+      const v = (x - h) ** 2 + (y - k) ** 2;
+      return m(`${binom('x', x, h)}<sup>2</sup> + ${binom('y', y, k)}<sup>2</sup> = ${fmt(v)}`) + `, not ${m(r2)}`;
+    }
+  };
+}
+/* standard-form display of Ax + By = C. order 'xy' or 'yx'. lead: make the first coefficient positive */
+function stdTerms(A, B, C, order, lead) {
+  let a = A, b = B, c = C;
+  const firstCoef = order === 'yx' ? (b !== 0 ? b : a) : (a !== 0 ? a : b);
+  if (lead && firstCoef < 0) { a = -a; b = -b; c = -c; }
+  const L = order === 'yx' ? [[b, 'y'], [a, 'x']] : [[a, 'x'], [b, 'y']];
+  return { L, R: [[c, '']], A: a, B: b, C: c };
+}
+function normLine(A, B, C) {
+  const g = gcd(gcd(A, B), C) || 1;
+  let s = (A < 0 || (A === 0 && B < 0)) ? -1 : 1;
+  return [s * A / g, s * B / g, s * C / g];
+}
+
+/* ---------- parsing a typed point ---------- */
+function parseNum(s) {
+  const mm = s.match(/^(-?)(\d+(?:\.\d+)?|\.\d+)(?:\/(\d+(?:\.\d+)?))?$/);
+  if (!mm) return null;
+  let v = parseFloat(mm[2]);
+  if (mm[3] !== undefined) { const d = parseFloat(mm[3]); if (d === 0) return null; v /= d; }
+  return mm[1] ? -v : v;
+}
+function parsePoint(raw) {
+  let s = (raw || '').replace(/[\u2212\u2013\u2014]/g, '-').replace(/\s+/g, '');
+  if (!s) return { status: 'empty' };
+  let parens = false;
+  const mm = s.match(/^\((.*)\)$/);
+  if (mm) { parens = true; s = mm[1]; }
+  else if (/[()\[\]{}]/.test(s)) return { status: 'bad' };
+  const parts = s.split(',');
+  if (parts.length === 1 && parseNum(parts[0]) !== null) return { status: 'single' };
+  if (parts.length !== 2) return { status: 'bad' };
+  const x = parseNum(parts[0]), y = parseNum(parts[1]);
+  if (x === null || y === null) return { status: 'bad' };
+  return { status: parens ? 'ok' : 'noparens', x, y };
+}
+const samePt = (p, q) => near(p[0], q[0]) && near(p[1], q[1]);
+
+/* Generic "check it in each equation" message */
+function substitutionNote(eqs, p) {
+  for (let i = 0; i < eqs.length; i++) {
+    if (!eqs[i].holds(p[0], p[1])) {
+      return `Check ${fmtPt(p)} in the ${ORD[i]} equation: ${eqs[i].why(p[0], p[1])}.`;
+    }
+  }
+  return null;
+}
+
+/* =====================================================================
+   Graph geometry: points of interest (intersections, intercepts, vertex)
+   ===================================================================== */
+function curveName(c) { return c.type === 'line' ? 'line' : c.type === 'circle' ? 'circle' : 'parabola'; }
+function poisFor(curves, sols) {
+  const N = SETTINGS.graphRange, out = [];
+  const add = (x, y, tag, isSol) => {
+    if (Math.abs(x) > N + 1e-9 || Math.abs(y) > N + 1e-9) return;
+    const ex = out.find(o => Math.abs(o.x - x) < 1e-6 && Math.abs(o.y - y) < 1e-6);
+    if (ex) { if (isSol) ex.sol = true; return; }
+    out.push({ x, y, tag, sol: !!isSol });
+  };
+  sols.forEach(p => add(p[0], p[1], 'a solution', true));
+  curves.forEach(c => {
+    const nm = `${c.colorName} ${curveName(c)}`;
+    if (c.type === 'line') {
+      if (c.A !== 0) add(c.C / c.A, 0, `the x-intercept of the ${nm}`);
+      if (c.B !== 0) add(0, c.C / c.B, `the y-intercept of the ${nm}`);
+    } else if (c.type === 'circle') {
+      const dx = c.r2 - c.k * c.k; if (dx >= 0) { add(c.h + Math.sqrt(dx), 0, `an x-intercept of the ${nm}`); add(c.h - Math.sqrt(dx), 0, `an x-intercept of the ${nm}`); }
+      const dy = c.r2 - c.h * c.h; if (dy >= 0) { add(0, c.k + Math.sqrt(dy), `a y-intercept of the ${nm}`); add(0, c.k - Math.sqrt(dy), `a y-intercept of the ${nm}`); }
+    } else {
+      add(0, c.c, `the y-intercept of the ${nm}`);
+      const disc = c.b * c.b - 4 * c.a * c.c;
+      if (disc >= 0) { const r1 = (-c.b + Math.sqrt(disc)) / (2 * c.a), r2 = (-c.b - Math.sqrt(disc)) / (2 * c.a); add(r1, 0, `an x-intercept of the ${nm}`); add(r2, 0, `an x-intercept of the ${nm}`); }
+      const vx = -c.b / (2 * c.a); add(vx, c.a * vx * vx + c.b * vx + c.c, `the vertex of the ${nm}`);
+    }
+  });
+  return out;
+}
+function coordLabel(v) {
+  const r = Math.round(v * 1000) / 1000;
+  const s = Math.abs(r).toString();
+  return (r < 0 ? MINUS : '') + s;
+}
+
+/* =====================================================================
+   Problem generators — every problem is built from its answer
+   ===================================================================== */
+const SLOPES = [[1,1],[2,1],[3,1],[4,1],[-1,1],[-2,1],[-3,1],[-4,1],[1,2],[-1,2],[1,3],[-1,3],[2,3],[-2,3],[3,2],[-3,2],[0,1]];
+
+function lineDisplay(A, B, C, color, allowSI) {
+  // A x + B y = C, normalized. Prefer slope-intercept when it has integer slope and intercept.
+  if (B !== 0 && allowSI && A % B === 0 && C % B === 0 && Math.random() < 0.55) {
+    const mm = -A / B, b = C / B;
+    return mkLin([[1, 'y']], [[mm, 'x'], [b, '']], color);
+  }
+  if (A === 0) return mkLin([[1, 'y']], [[C / B, '']], color);
+  const st = stdTerms(A, B, C, Math.random() < 0.5 ? 'xy' : 'yx', true);
+  return mkLin(st.L, st.R, color);
+}
+
+function genL1() {
+  for (;;) {
+    const x0 = R(-6, 6), y0 = R(-6, 6);
+    if (x0 === 0 && y0 === 0) continue;
+    const s1 = pick(SLOPES), s2 = pick(SLOPES);
+    if (Math.abs(s1[0] / s1[1] - s2[0] / s2[1]) < 0.5) continue;
+    const lines = [s1, s2].map(([p, q]) => normLine(p, -q, p * x0 - q * y0));
+    const colors = ['red', 'blue'];
+    const eqs = lines.map((L, i) => lineDisplay(L[0], L[1], L[2], colors[i], true));
+    const curves = lines.map((L, i) => ({ type: 'line', A: L[0], B: L[1], C: L[2], colorName: colors[i] }));
+    const sols = [[x0, y0]];
+    return {
+      level: 0, eqs, curves, sols, mode: 'one', pois: poisFor(curves, sols),
+      named: pts => namedGraph(eqs, curves, sols, pts),
+      setup: () => `Find the spot where the red and blue lines cross each other. Tap it to see its coordinates. ${m('<i>x</i>')} comes first, then ${m('<i>y</i>')}.`,
+      solution: () => solutionGraph(eqs, sols, 'lines')
+    };
+  }
+}
+
+function latticeOnCircle(h, k, r2) {
+  const pts = [], r = Math.floor(Math.sqrt(r2));
+  for (let a = -r; a <= r; a++) for (let b = -r; b <= r; b++) if (a * a + b * b === r2) pts.push([h + a, k + b, a, b]);
+  return pts;
+}
+let l2Count = 0;
+function genL2() {
+  if (l2Count === 0) l2Count = Math.random() < 0.5 ? 1 : 2;
+  const useCircle = (l2Count++ % 2 === 0);
+  const tangent = Math.random() < SETTINGS.level2TangentChance;
+  for (;;) {
+    const p = useCircle ? genL2Circle(tangent) : genL2Parabola(tangent);
+    if (p) return p;
+  }
+}
+function genL2Circle(tangent) {
+  const r2 = pick([25, 25, 10, 13, 17, 20, 5, 8, 9, 16]);
+  const centered = Math.random() < 0.5;
+  const h = centered ? 0 : R(-3, 3), k = centered ? 0 : R(-3, 3);
+  const L = latticeOnCircle(h, k, r2);
+  if (L.some(([x, y]) => Math.abs(x) > 9 || Math.abs(y) > 9)) return null;
+  let line, sols;
+  if (tangent) {
+    const P = pick(L); const [, , a, b] = P;
+    if (b === 0) return null;
+    line = normLine(a, b, a * P[0] + b * P[1]);
+    sols = [[P[0], P[1]]];
+  } else {
+    const P = pick(L), Q = pick(L);
+    if (P[0] === Q[0]) return null;           // no vertical lines
+    line = normLine(Q[1] - P[1], -(Q[0] - P[0]), (Q[1] - P[1]) * P[0] - (Q[0] - P[0]) * P[1]);
+    sols = [[P[0], P[1]], [Q[0], Q[1]]];
+  }
+  const eqC = mkCircle(h, k, r2, 'red');
+  const eqL = lineDisplay(line[0], line[1], line[2], 'blue', true);
+  const curves = [{ type: 'circle', h, k, r2, colorName: 'red' }, { type: 'line', A: line[0], B: line[1], C: line[2], colorName: 'blue' }];
+  const eqs = [eqC, eqL];
+  return {
+    level: 1, eqs, curves, sols, mode: 'oneOrTwo', shape: 'circle', pois: poisFor(curves, sols),
+    named: pts => namedGraph(eqs, curves, sols, pts),
+    setup: () => `Look for every place the blue line meets the red circle. A line can cross a circle twice or just touch it once (tangent). Tap each crossing to see its coordinates.`,
+    solution: () => solutionGraph(eqs, sols, 'circle')
+  };
+}
+function genL2Parabola(tangent) {
+  const a = pick([1, -1, 0.5, -0.5]);
+  const half = Math.abs(a) === 0.5;
+  const h = half ? pick([-4, -2, 0, 2, 4]) : R(-4, 4);
+  const k = R(-6, 6);
+  const f = x => a * (x - h) ** 2 + k;
+  const xs = [];
+  for (let x = -8; x <= 8; x++) if ((!half || (x - h) % 2 === 0) && Math.abs(f(x)) <= 9) xs.push(x);
+  if (xs.length < 2) return null;
+  let mSlope, b0, sols;
+  if (tangent) {
+    const x0 = pick(xs); mSlope = 2 * a * (x0 - h); b0 = f(x0) - mSlope * x0; sols = [[x0, f(x0)]];
+  } else {
+    const x1 = pick(xs), x2 = pick(xs); if (x1 === x2) return null;
+    mSlope = a * (x1 + x2 - 2 * h); b0 = f(x1) - mSlope * x1; sols = [[x1, f(x1)], [x2, f(x2)]];
+  }
+  if (!isInt(mSlope) || !isInt(b0) || Math.abs(mSlope) > 4 || Math.abs(b0) > 12) return null;
+  const B = -2 * a * h, C = a * h * h + k;
+  const eqP = mkLin([[1, 'y']], [[a, 'x2'], [B, 'x'], [C, '']], 'red');
+  const eqL = mkLin([[1, 'y']], [[mSlope, 'x'], [b0, '']], 'blue');
+  const curves = [{ type: 'parab', a, b: B, c: C, colorName: 'red' }, { type: 'line', A: -mSlope, B: 1, C: b0, colorName: 'blue' }];
+  const eqs = [eqP, eqL];
+  return {
+    level: 1, eqs, curves, sols, mode: 'oneOrTwo', shape: 'parabola', pois: poisFor(curves, sols),
+    named: pts => namedGraph(eqs, curves, sols, pts),
+    setup: () => `Look for every place the blue line meets the red parabola. A line can cross a parabola twice or just touch it once (tangent). Tap each crossing to see its coordinates.`,
+    solution: () => solutionGraph(eqs, sols, 'parabola')
+  };
+}
+
+function genL3() {
+  for (;;) {
+    const x0 = R(-6, 6), y0 = R(-9, 9);
+    if (x0 === 0) continue;
+    const m1 = pick([-5,-4,-3,-2,-1,1,2,3,4,5]), m2 = pick([-5,-4,-3,-2,-1,1,2,3,4,5]);
+    if (m1 === m2) continue;
+    const b1 = y0 - m1 * x0, b2 = y0 - m2 * x0;
+    if (Math.abs(b1) > 15 || Math.abs(b2) > 15) continue;
+    const eqs = [mkLin([[1, 'y']], [[m1, 'x'], [b1, '']]), mkLin([[1, 'y']], [[m2, 'x'], [b2, '']])];
+    const sols = [[x0, y0]];
+    const setEq = m(`${expr([[m1, 'x'], [b1, '']])} = ${expr([[m2, 'x'], [b2, '']])}`);
+    return {
+      level: 2, eqs, sols, mode: 'one',
+      named: pts => {
+        const [x, y] = pts[0];
+        if (near(x, y0) && near(y, x0) && x0 !== y0) return swappedMsg(x0, y0);
+        if (near(x, -x0) && !near(y, y0) || (near(x, -x0) && near(y, m1 * -x0 + b1))) return `Check the sign of ${m('<i>x</i>')}. When a term moves across the equal sign, its sign changes. From ${setEq}, get the ${m('<i>x</i>')}-terms on one side and the constants on the other.`;
+        if (near(x, x0) && !near(y, y0)) return `Your ${m('<i>x</i>')} is right. Now substitute ${m('<i>x</i> = ' + fmt(x0))} into one of the original equations to find ${m('<i>y</i>')}.`;
+        if (near(y, y0) && !near(x, x0)) return `Your ${m('<i>y</i>')} is right, but ${m('<i>x</i>')} isn't. ${substitutionNote(eqs, [x, y]) || ''}`;
+        return null;
+      },
+      setup: () => `Both equations equal ${m('<i>y</i>')}, so set the right sides equal: ${setEq}. Solve for ${m('<i>x</i>')}, then substitute to find ${m('<i>y</i>')}.`,
+      solution: () => {
+        const dm = m1 - m2, db = b2 - b1;
+        return `<ol class="steps">
+          <li>Set the right sides equal: ${setEq}</li>
+          <li>Collect terms: ${m(expr([[dm, 'x']]) + ' = ' + fmt(db))}, so ${m('<i>x</i> = ' + fmt(x0))}</li>
+          <li>Substitute into the first equation: ${m('<i>y</i> = ' + subExpr([[m1, 'x'], [b1, '']], x0, 0) + ' = ' + fmt(y0))}</li>
+          <li>Solution: ${fmtPt([x0, y0])}. Check it in the second equation: ${m(subExpr([[m2, 'x'], [b2, '']], x0, 0) + ' = ' + fmt(y0))} ✓</li></ol>`;
+      }
+    };
+  }
+}
+
+/* ---------- elimination helpers (Levels 4 and 5) ----------
+   eqA: eA·e + pA·o = CA, eqB: eB·e + qB·o = CB, where e is the variable eliminated
+   and o the one left. Adding eqA + λ·eqB removes e.                                    */
+function elimProblem(level, cfg) {
+  const { e, o, val, eqA, eqB, lam, order } = cfg;
+  const eqsRaw = order === 0 ? [eqA, eqB] : [eqB, eqA];
+  const nameA = ORD[order === 0 ? 0 : 1], nameB = ORD[order === 0 ? 1 : 0];
+  const toEq = q => {
+    const cx = q.e === 'x' ? q.ce : q.co, cy = q.e === 'x' ? q.co : q.ce;
+    const L = q.yFirst ? [[cy, 'y'], [cx, 'x']] : [[cx, 'x'], [cy, 'y']];
+    return mkLin(L, [[q.C, '']]);
+  };
+  const eqs = eqsRaw.map(toEq);
+  const EA = toEq(eqA), EB = toEq(eqB);
+  const sols = [[val.x, val.y]];
+  const coefSum = eqA.co + lam * eqB.co, constSum = eqA.C + lam * eqB.C;
+  const vo = val[o], ve = val[e];
+  // Values that common mistakes produce for the remaining variable
+  const traps = [];
+  if (level === 3) {
+    if (lam === 1) { const d = eqA.co - eqB.co; if (d !== 0) traps.push([(eqA.C - eqB.C) / d, 'opp']); }
+    else {
+      const d1 = eqA.co + eqB.co; if (d1 !== 0) traps.push([(eqA.C + eqB.C) / d1, 'same']);
+      const d2 = eqA.co - eqB.co; if (d2 !== 0) traps.push([(eqA.C + eqB.C) / d2, 'constsign']);
+    }
+  } else {
+    const s = Math.sign(lam);
+    traps.push([(eqA.C + s * eqB.C) / coefSum, 'constNotScaled']);
+    const d = eqA.co + s * eqB.co; if (d !== 0) traps.push([constSum / d, 'otherNotScaled']);
+  }
+  const lhsA = expr(EA.L), lhsB = expr(EB.L);
+  const paren = v => v < 0 ? `(${fmt(v)})` : fmt(v);
+  const setupText = () => {
+    if (level === 3) {
+      return lam === 1
+        ? `The ${m(varHTML(e))}-coefficients ${m(fmt(eqA.ce) + varHTML(e))} and ${m(fmt(eqB.ce) + varHTML(e))} are opposites, so add the equations: ${m(`(${lhsA}) + (${lhsB}) = ${fmt(eqA.C)} + ${paren(eqB.C)}`)}`
+        : `The ${m(varHTML(e))}-coefficients match, so subtract the ${nameB} equation from the ${nameA}, every term: ${m(`(${lhsA}) ${MINUS} (${lhsB}) = ${fmt(eqA.C)} ${MINUS} ${paren(eqB.C)}`)}`;
+    }
+    const scaled = mkLin(EB.L.map(([c, v]) => [c * lam, v]), [[EB.R[0][0] * lam, '']]);
+    return `Multiply every term of the ${nameB} equation by ${m(fmt(lam))}: ${m(scaled.html)}. Now the ${m(varHTML(e))}-terms are opposites, so add it to the ${nameA} equation.`;
+  };
+  // substitute o back into eqA
+  const backSub = () => {
+    const known = EA.L.map(([c, v]) => v === o ? [c * vo, ''] : [c, v]);
+    const rest = eqA.C - eqA.co * vo;
+    return `Substitute ${m(varHTML(o) + ' = ' + fmt(vo))} into the ${nameA} equation: ${m(subExpr(EA.L, val.x, val.y, o) + ' = ' + fmt(eqA.C))}, so ${m(expr([[eqA.ce, e]]) + ' = ' + fmt(rest))} and ${m(varHTML(e) + ' = ' + fmt(ve))}`;
+  };
+  return {
+    level, eqs, sols, mode: 'one', lam, e, o, eqA, eqB,
+    named: pts => {
+      const [x, y] = pts[0], st = { x, y };
+      if (near(x, val.y) && near(y, val.x) && val.x !== val.y) return swappedMsg(val.x, val.y);
+      if (near(st[o], vo) && !near(st[e], ve)) return `Your ${m(varHTML(o))} is right. Substitute ${m(varHTML(o) + ' = ' + fmt(vo))} into one of the original equations and solve for ${m(varHTML(e))}.`;
+      for (const [tv, kind] of traps) {
+        if (!isFinite(tv) || near(tv, vo) || !near(st[o], tv)) continue;
+        if (kind === 'opp') return `Here the ${m(varHTML(e))}-terms are opposites (${m(fmt(eqA.ce) + varHTML(e))} and ${m(fmt(eqB.ce) + varHTML(e))}). It looks like you subtracted the equations. Opposites cancel when you <b>add</b>.`;
+        if (kind === 'same') return `Here the ${m(varHTML(e))}-terms are the same (${m(fmt(eqA.ce) + varHTML(e))} in both). It looks like you added the equations, which doesn't cancel ${m(varHTML(e))}. Matching terms cancel when you <b>subtract</b>.`;
+        if (kind === 'constsign') return `You subtracted the variable terms but added the constants. When you subtract one equation from the other, subtract <b>every</b> term, including ${m(fmt(eqB.C))} on the right side.`;
+        if (kind === 'constNotScaled') return `It looks like you multiplied the left side of the ${nameB} equation by ${m(fmt(lam))} but not the constant on the right. Multiply every term on both sides: ${m(fmt(eqB.C))} becomes ${m(fmt(eqB.C * lam))}.`;
+        if (kind === 'otherNotScaled') return `It looks like you multiplied only the ${m(varHTML(e))}-term of the ${nameB} equation by ${m(fmt(lam))}. Multiply every term: the ${m(varHTML(o))}-term ${m(expr([[eqB.co, o]]))} becomes ${m(expr([[eqB.co * lam, o]]))}.`;
+      }
+      if (near(st[e], ve) && !near(st[o], vo)) return `Your ${m(varHTML(e))} is right, but ${m(varHTML(o))} isn't. ${substitutionNote(eqs, [x, y]) || ''}`;
+      return null;
+    },
+    setup: setupText,
+    solution: () => {
+      let first;
+      if (level === 3 && lam === 1) first = `The ${m(varHTML(e))}-terms are opposites, so add the equations: ${m(expr([[coefSum, o]]) + ' = ' + fmt(constSum))}`;
+      else if (level === 3) first = `The ${m(varHTML(e))}-terms match, so subtract the ${nameB} equation from the ${nameA}: ${m(expr([[coefSum, o]]) + ' = ' + fmt(constSum))}`;
+      else first = `${setupText()} Result: ${m(expr([[coefSum, o]]) + ' = ' + fmt(constSum))}`;
+      return `<ol class="steps"><li>${first}</li>
+        <li>Solve: ${m(varHTML(o) + ' = ' + fmt(vo))}</li>
+        <li>${backSub()}</li>
+        <li>Solution: ${fmtPt(sols[0])}. Check it in the ${nameB} equation: ${EB.verify(val.x, val.y)} ✓</li></ol>`;
+    }
+  };
+}
+function genL4() {
+  const mode = (state.done[3] ? Math.random() < 0.5 : state.correct[3] === 0) ? 'opp' : 'same';
+  for (;;) {
+    const x0 = R(-6, 6), y0 = R(-6, 6);
+    if (x0 === 0 || y0 === 0) continue;
+    const e = pick(['x', 'y']), o = e === 'x' ? 'y' : 'x';
+    const val = { x: x0, y: y0 };
+    const ce = R(1, 6) * pick([1, -1]);
+    const ceA = ce, ceB = mode === 'opp' ? -ce : ce;
+    const pA = R(1, 7) * pick([1, -1]), qB = R(1, 7) * pick([1, -1]);
+    if (Math.abs(pA) === Math.abs(qB)) continue;          // the other pair must not cancel too
+    const lam = mode === 'opp' ? 1 : -1;
+    if (pA + lam * qB === 0) continue;
+    const CA = ceA * val[e] + pA * val[o], CB = ceB * val[e] + qB * val[o];
+    if (Math.abs(CA) > 50 || Math.abs(CB) > 50) continue;
+    if (gcd(gcd(ceA, pA), CA) !== 1 || gcd(gcd(ceB, qB), CB) !== 1) continue;   // no equation that reduces
+    const p = elimProblem(3, { e, o, val, lam, order: 0,
+      eqA: { e, ce: ceA, co: pA, C: CA, yFirst: false }, eqB: { e, ce: ceB, co: qB, C: CB, yFirst: false } });
+    p.l4mode = mode;
+    return p;
+  }
+}
+const lcm = (a, b) => Math.abs(a * b) / gcd(a, b);
+function genL5() {
+  // Neither pair of coefficients is a multiple of the other (like 3x + 4y and 2x − 5y), so both equations get multiplied.
+  const tough = (a, b) => Math.abs(a) >= 2 && Math.abs(b) >= 2 && Math.abs(a) % Math.abs(b) !== 0 && Math.abs(b) % Math.abs(a) !== 0;
+  for (;;) {
+    let x0 = R(-6, 6), y0 = R(-6, 6);
+    if (x0 === 0 || y0 === 0) continue;
+    if (SETTINGS.level5AllowHalves && Math.random() < 0.4) { if (Math.random() < 0.5) x0 += 0.5 * pick([1, -1]); else y0 += 0.5 * pick([1, -1]); }
+    const c = () => R(2, 7) * pick([1, -1]);
+    const q = [{ a: c(), b: c() }, { a: c(), b: c() }];
+    if (!tough(q[0].a, q[1].a) || !tough(q[0].b, q[1].b)) continue;
+    if (q[0].a * q[1].b - q[1].a * q[0].b === 0) continue;
+    let okc = true;
+    for (const e of q) {
+      e.C = e.a * x0 + e.b * y0;
+      if (!isInt(e.C) || Math.abs(e.C) > 60 || gcd(gcd(e.a, e.b), e.C) !== 1) okc = false;
+      e.yFirst = Math.random() < 0.5;
+      if ((e.yFirst ? e.b : e.a) < 0) { e.a = -e.a; e.b = -e.b; e.C = -e.C; }
+    }
+    if (!okc) continue;
+    return l5Problem(q, { x: x0, y: y0 });
+  }
+}
+function l5Problem(q, val) {
+  const E = q.map(e => mkLin(e.yFirst ? [[e.b, 'y'], [e.a, 'x']] : [[e.a, 'x'], [e.b, 'y']], [[e.C, '']]));
+  const coef = (e, v) => v === 'x' ? e.a : e.b;
+  const paths = ['x', 'y'].map(ev => {
+    const o = ev === 'x' ? 'y' : 'x';
+    const L = lcm(coef(q[0], ev), coef(q[1], ev));
+    const mu1 = L / Math.abs(coef(q[0], ev)), mu2 = -coef(q[0], ev) * mu1 / coef(q[1], ev);
+    const cs = mu1 * coef(q[0], o) + mu2 * coef(q[1], o), ks = mu1 * q[0].C + mu2 * q[1].C;
+    return { e: ev, o, L, mu: [mu1, mu2], cs, ks,
+      traps: [[(Math.sign(mu1) * q[0].C + mu2 * q[1].C) / cs, 0], [(mu1 * q[0].C + Math.sign(mu2) * q[1].C) / cs, 1]] };
+  });
+  const main = paths[0].L < paths[1].L ? paths[0] : paths[1].L < paths[0].L ? paths[1] : pick(paths);
+  const sols = [[val.x, val.y]];
+  const scaled = (i, mu) => mkLin(E[i].L.map(([c, v]) => [c * mu, v]), [[q[i].C * mu, '']]);
+  const { e, o, mu } = main, vo = val[o], ve = val[e];
+  const setup = () => `To eliminate ${m(varHTML(e))}, multiply the first equation by ${m(fmt(mu[0]))}: ${m(scaled(0, mu[0]).html)}, and the second by ${m(fmt(mu[1]))}: ${m(scaled(1, mu[1]).html)}. Now the ${m(varHTML(e))}-terms are opposites, so add.`;
+  return {
+    level: 4, eqs: E, sols, mode: 'one', q, paths,
+    named: pts => {
+      const [x, y] = pts[0], st = { x, y };
+      if (near(x, val.y) && near(y, val.x) && val.x !== val.y) return swappedMsg(val.x, val.y);
+      for (const pth of paths) for (const [tv, i] of pth.traps) {
+        if (!isFinite(tv) || near(tv, val[pth.o]) || !near(st[pth.o], tv)) continue;
+        return `It looks like you multiplied the left side of the ${ORD[i]} equation by ${m(fmt(pth.mu[i]))} but not the constant on the right. Multiply every term on both sides: ${m(fmt(q[i].C))} becomes ${m(fmt(q[i].C * pth.mu[i]))}.`;
+      }
+      if (near(x, val.x) && !near(y, val.y)) return `Your ${m('<i>x</i>')} is right. Substitute ${m('<i>x</i> = ' + fmt(val.x))} into one of the original equations and solve for ${m('<i>y</i>')}.`;
+      if (near(y, val.y) && !near(x, val.x)) return `Your ${m('<i>y</i>')} is right. Substitute ${m('<i>y</i> = ' + fmt(val.y))} into one of the original equations and solve for ${m('<i>x</i>')}.`;
+      return null;
+    },
+    setup,
+    solution: () => {
+      const rest = q[0].C - coef(q[0], o) * vo;
+      return `<ol class="steps">
+        <li>${setup()}</li>
+        <li>Adding gives ${m(expr([[main.cs, o]]) + ' = ' + fmt(main.ks))}, so ${m(varHTML(o) + ' = ' + fmt(vo))}</li>
+        <li>Substitute ${m(varHTML(o) + ' = ' + fmt(vo))} into the first equation: ${m(subExpr(E[0].L, val.x, val.y, o) + ' = ' + fmt(q[0].C))}, so ${m(expr([[coef(q[0], e), e]]) + ' = ' + fmt(rest))} and ${m(varHTML(e) + ' = ' + fmt(ve))}</li>
+        <li>Solution: ${fmtPt(sols[0])}. Check it in the second equation: ${E[1].verify(val.x, val.y)} ✓</li></ol>`;
+    }
+  };
+}
+
+function genL6() {
+  const kind = Math.random() < 0.5 ? 'none' : 'inf';
+  const form = kind === 'none' ? pick(['si', 'std', 'mix']) : pick(['std', 'mix']);
+  for (;;) {
+    if (form === 'si') {
+      const mm = pick([-5,-4,-3,-2,-1,1,2,3,4,5]), b1 = R(-9, 9), b2 = R(-9, 9);
+      if (b1 === b2) continue;
+      const eqs = [mkLin([[1, 'y']], [[mm, 'x'], [b1, '']]), mkLin([[1, 'y']], [[mm, 'x'], [b2, '']])];
+      const setEq = m(`${expr([[mm, 'x'], [b1, '']])} = ${expr([[mm, 'x'], [b2, '']])}`);
+      return { level: 5, eqs, sols: [], special: kind, mode: 'special', form,
+        named: l6Named(eqs),
+        setup: () => `Both equations equal ${m('<i>y</i>')}, so set the right sides equal: ${setEq}. What happens to ${m('<i>x</i>')}?`,
+        solution: () => `<ol class="steps"><li>Set the right sides equal: ${setEq}</li>
+          <li>Subtract ${m(expr([[mm, 'x']]))} from both sides: ${m(fmt(b1) + ' = ' + fmt(b2))}, which is false.</li>
+          <li>The lines have the same slope (${m(fmt(mm))}) and different ${m('<i>y</i>')}-intercepts, so they are parallel and never cross: <b>no solution</b>.</li></ol>` };
+    }
+    // base equation A x + B y = C
+    let A, B, C, baseIsSI = false, mm = 0, bb = 0;
+    if (form === 'mix') { mm = pick([-5,-4,-3,-2,-1,1,2,3,4,5]); bb = R(-9, 9); A = mm; B = -1; C = -bb; baseIsSI = true; }
+    else { A = R(1, 6); B = R(1, 6) * pick([1, -1]); if (gcd(A, B) !== 1) continue; C = R(-12, 12); }
+    const lam = kind === 'inf' ? pick([-3, -2, 2, 3, 4]) : pick([-3, -2, -1, 1, 2, 3]);
+    const delta = kind === 'inf' ? 0 : pick([-9,-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8,9]);
+    const A2 = lam * A, B2 = lam * B, C2 = lam * C + delta;
+    if (Math.abs(C2) > 40) continue;
+    if (form === 'std' && lam === 1 && Math.random() < 0.5) continue;
+    let baseEq;
+    if (baseIsSI) baseEq = mkLin([[1, 'y']], [[mm, 'x'], [bb, '']]);
+    else { const sb = stdTerms(A, B, C, Math.random() < 0.5 ? 'xy' : 'yx', true); baseEq = mkLin(sb.L, sb.R); A = sb.A; B = sb.B; C = sb.C; }
+    const s2 = stdTerms(A2, B2, C2, Math.random() < 0.5 ? 'xy' : 'yx', true);
+    const otherEq = mkLin(s2.L, s2.R);
+    // coefficients exactly as the other equation is displayed
+    const dispA2 = s2.A, dispB2 = s2.B, dispC2 = s2.C;
+    const mu = dispA2 / A;   // multiply base (A,B,C) by mu to match the other equation's left side
+    const order = Math.random() < 0.5 ? 0 : 1;
+    const eqs = order === 0 ? [baseEq, otherEq] : [otherEq, baseEq];
+    const nameBase = ORD[order], nameOther = ORD[1 - order];
+    const resultC = dispC2 - mu * C;
+    const scaled = mkLin([[mu * A, 'x'], [mu * B, 'y']], [[mu * C, '']]);
+    return { level: 5, eqs, sols: [], special: kind, mode: 'special', form,
+      named: l6Named(eqs),
+      setup: () => `${baseIsSI ? `Rewrite the ${nameBase} equation as ${m(mkLin([[A, 'x'], [B, 'y']], [[C, '']]).html)}. ` : ''}Multiply the ${nameBase} equation by ${m(fmt(mu))} and compare it with the ${nameOther} equation. What happens when you subtract?`,
+      solution: () => `<ol class="steps">${baseIsSI ? `<li>Rewrite the ${nameBase} equation in standard form: ${m(mkLin([[A, 'x'], [B, 'y']], [[C, '']]).html)}</li>` : ''}
+        <li>Multiply the ${nameBase} equation by ${m(fmt(mu))}: ${m(scaled.html)}</li>
+        <li>Its left side matches the ${nameOther} equation (${m(mkLin([[dispA2, 'x'], [dispB2, 'y']], [[dispC2, '']]).html)}). Subtract: ${m('0 = ' + fmt(resultC))}</li>
+        <li>${kind === 'inf' ? `${m('0 = 0')} is always true. Both equations describe the same line, so every point on it works: <b>infinitely many solutions</b>.` : `${m('0 = ' + fmt(resultC))} is false. The lines are parallel and never cross: <b>no solution</b>.`}</li></ol>` };
+  }
+}
+function l6Named(eqs) {
+  return (pts, choice) => {
+    if (choice === 'one' && pts && pts[0]) {
+      const note = substitutionNote(eqs, pts[0]);
+      return `${note ? note + ' ' : ''}These two lines have the same slope, so they can't cross at exactly one point.`;
+    }
+    return `Solve it and look at the statement left after ${m('<i>x</i>')} and ${m('<i>y</i>')} cancel. Is it true (like ${m('0 = 0')}) or false (like ${m('0 = 5')})?`;
+  };
+}
+
+function factorHTML(r) { return r === 0 ? '<i>x</i>' : `(<i>x</i> ${r > 0 ? MINUS : '+'} ${Math.abs(r)})`; }
+function genL7() {
+  for (;;) {
+    const r1 = R(-6, 6), r2 = R(-6, 6);
+    if (r1 === r2) continue;
+    if ((r1 === 0 || r2 === 0) && Math.random() < 0.6) continue;
+    const mm = R(-4, 4), k = R(-6, 6);
+    if (mm === 0 && (k === 0 || Math.random() < 0.6)) continue;
+    const B = mm - r1 - r2, C = k + r1 * r2;
+    if (Math.abs(C) > 30) continue;
+    const ys = [mm * r1 + k, mm * r2 + k];
+    if (ys.some(v => Math.abs(v) > 30)) continue;
+    const eqQ = mkLin([[1, 'y']], [[1, 'x2'], [B, 'x'], [C, '']]);
+    const eqL = mkLin([[1, 'y']], [[mm, 'x'], [k, '']]);
+    const eqs = [eqQ, eqL];
+    const sols = [[r1, ys[0]], [r2, ys[1]]];
+    const zeroQ = m(expr([[1, 'x2'], [B - mm, 'x'], [C - k, '']]) + ' = 0');
+    const setEq = m(`${expr([[1, 'x2'], [B, 'x'], [C, '']])} = ${expr([[mm, 'x'], [k, '']])}`);
+    const roots = new Set([r1, r2]);
+    return {
+      level: 6, eqs, sols, mode: 'two',
+      named: pts => {
+        const xs = pts.map(p => p[0]);
+        if (xs.every(x => roots.has(Math.round(x)) && isInt(x)) && new Set(xs).size === 2) {
+          return `Your ${m('<i>x</i>')}-values are right. For each one, substitute it into the line ${m(eqL.html)} to find its ${m('<i>y</i>')}-value.`;
+        }
+        if (xs.every(x => isInt(x) && roots.has(-Math.round(x))) && new Set(xs).size === 2 && !(roots.has(-r1) && roots.has(-r2) && r1 === -r2)) {
+          return `Check the signs when you solve each factor. From ${m(factorHTML(r1) + factorHTML(r2) + ' = 0')}, set each factor equal to 0: ${m(factorHTML(r1).replace(/[()]/g, '') + ' = 0')} gives ${m('<i>x</i> = ' + fmt(r1))}.`;
+        }
+        const B2 = B + mm, C2 = C + k, disc = B2 * B2 - 4 * C2;
+        if (disc >= 0) {
+          const s = Math.sqrt(disc), t1 = (-B2 + s) / 2, t2 = (-B2 - s) / 2;
+          if (isInt(t1) && isInt(t2) && xs.length === 2 && xs.some(x => near(x, t1) || near(x, t2)) && !xs.some(x => roots.has(Math.round(x)) && isInt(x))) {
+            return `When you move the line's terms to the quadratic side, subtract them (change their signs): ${m(`${expr([[1, 'x2'], [B, 'x'], [C, '']])} ${MINUS} (${expr([[mm, 'x'], [k, '']])}) = 0`)}.`;
+          }
+        }
+        const right = pts.filter(p => sols.some(s => samePt(s, p)));
+        if (right.length === 1) {
+          const wrong = pts.find(p => !sols.some(s => samePt(s, p)));
+          const note = wrong ? substitutionNote(eqs, wrong) : null;
+          return `${fmtPt(right[0])} is one of the solutions. ${note || 'Check your other point in both equations.'}`;
+        }
+        return null;
+      },
+      setup: () => `Set them equal: ${setEq}. Move the line's terms to the left side so the right side is 0: ${zeroQ}. Now factor.`,
+      solution: () => `<ol class="steps">
+        <li>Set the equations equal: ${setEq}</li>
+        <li>Move the line's terms to the left side: ${zeroQ}</li>
+        <li>Factor: ${m(factorHTML(r1) + factorHTML(r2) + ' = 0')}, so ${m('<i>x</i> = ' + fmt(r1))} or ${m('<i>x</i> = ' + fmt(r2))}</li>
+        <li>Find each ${m('<i>y</i>')} from the line: ${m(lineY(mm, k, r1))} and ${m(lineY(mm, k, r2))}</li>
+        <li>Solutions: ${fmtPt(sols[0])} and ${fmtPt(sols[1])}</li></ol>`
+    };
+  }
+}
+
+function lineY(mm, k, x) { // "y = 2(3) − 1 = 5", or just "y = 4" for a horizontal line
+  const v = mm * x + k;
+  return mm === 0 ? '<i>y</i> = ' + fmt(v) : '<i>y</i> = ' + subExpr([[mm, 'x'], [k, '']], x, 0) + ' = ' + fmt(v);
+}
+function quadHTML(a, b, c) { return expr([[a, 'x2'], [b, 'x'], [c, '']]); }
+function signsMsg(r) {
+  return `Check the signs when you solve each factor: ${m(factorHTML(r).replace(/[()]/g, '') + ' = 0')} gives ${m('<i>x</i> = ' + fmt(r))}, not ${m(fmt(-r))}.`;
+}
+function genL8() {
+  for (;;) {
+    const r = R(-5, 5);
+    if (r === 0 && Math.random() < 0.7) continue;
+    const mm = R(-4, 4), k = R(-6, 6);
+    if (mm === 0 && (k === 0 || Math.random() < 0.6)) continue;
+    const B = mm - 2 * r, C = k + r * r, y0 = mm * r + k;
+    if (Math.abs(C) > 30 || Math.abs(y0) > 30) continue;
+    const eqQ = mkLin([[1, 'y']], [[1, 'x2'], [B, 'x'], [C, '']]);
+    const eqL = mkLin([[1, 'y']], [[mm, 'x'], [k, '']]);
+    const eqs = [eqQ, eqL], sols = [[r, y0]];
+    const setEq = m(`${quadHTML(1, B, C)} = ${expr([[mm, 'x'], [k, '']])}`);
+    const zeroQ = m(quadHTML(1, B - mm, C - k) + ' = 0');
+    const sq = r === 0 ? '<i>x</i><sup>2</sup>' : factorHTML(r) + '<sup>2</sup>';
+    return {
+      level: 7, eqs, sols, mode: 'oneOrTwo',
+      named: pts => {
+        const right = pts.find(p => samePt(p, sols[0]));
+        if (pts.length === 2 && right) return `${fmtPt(right)} is right, but there's only one solution. ${m(quadHTML(1, B - mm, C - k))} is a perfect square: ${m(sq + ' = 0')}, so both factors give ${m('<i>x</i> = ' + fmt(r))}. The line is tangent to the parabola: it touches at just one point.`;
+        if (pts.some(p => near(p[0], r) && !near(p[1], y0))) return `Your ${m('<i>x</i>')}-value is right. Substitute ${m('<i>x</i> = ' + fmt(r))} into the line ${m(eqL.html)} to find ${m('<i>y</i>')}.`;
+        if (r !== 0 && pts.some(p => near(p[0], -r))) return signsMsg(r);
+        const B2 = B + mm, C2 = C + k, disc = B2 * B2 - 4 * C2;
+        if (disc >= 0) { const t1 = (-B2 + Math.sqrt(disc)) / 2, t2 = (-B2 - Math.sqrt(disc)) / 2;
+          if (pts.some(p => (near(p[0], t1) || near(p[0], t2)) && !near(p[0], r))) return `When you move the line's terms to the quadratic side, subtract them (change their signs): ${m(`${quadHTML(1, B, C)} ${MINUS} (${expr([[mm, 'x'], [k, '']])}) = 0`)}.`; }
+        return null;
+      },
+      setup: () => `Set them equal: ${setEq}. Move the line's terms to the left side: ${zeroQ}. Now factor. What do you notice about the two factors?`,
+      solution: () => `<ol class="steps">
+        <li>Set the equations equal: ${setEq}</li>
+        <li>Move the line's terms to the left side: ${zeroQ}</li>
+        <li>Factor: ${m(sq + ' = 0')}. Both factors are the same (a perfect square), so there is only one ${m('<i>x</i>')}-value: ${m('<i>x</i> = ' + fmt(r))}</li>
+        <li>Find ${m('<i>y</i>')} from the line: ${m(lineY(mm, k, r))}</li>
+        <li>One solution: ${fmtPt(sols[0])}. The line is tangent to the parabola.</li></ol>`
+    };
+  }
+}
+function genL9() {
+  for (;;) {
+    const r1 = R(-5, 5), r2 = R(-5, 5);
+    if (r1 === r2) continue;
+    if ((r1 === 0 || r2 === 0) && Math.random() < 0.6) continue;
+    const b1 = R(-6, 6), c1 = R(-9, 9);
+    const b2 = b1 + 2 * (r1 + r2), c2 = c1 - 2 * r1 * r2;      // up − down = 2(x − r1)(x − r2)
+    if (Math.abs(b2) > 14 || Math.abs(c2) > 30) continue;
+    const f = x => x * x + b1 * x + c1;
+    const ys = [f(r1), f(r2)];
+    if (ys.some(v => Math.abs(v) > 40)) continue;
+    const up = mkLin([[1, 'y']], [[1, 'x2'], [b1, 'x'], [c1, '']]);
+    const down = mkLin([[1, 'y']], [[-1, 'x2'], [b2, 'x'], [c2, '']]);
+    const upFirst = Math.random() < 0.5;
+    const eqs = upFirst ? [up, down] : [down, up];
+    const sols = [[r1, ys[0]], [r2, ys[1]]];
+    const roots = new Set([r1, r2]);
+    const setEq = m(`${quadHTML(1, b1, c1)} = ${quadHTML(-1, b2, c2)}`);
+    const zero2 = m(quadHTML(2, b1 - b2, c1 - c2) + ' = 0');
+    const zero1 = m(quadHTML(1, (b1 - b2) / 2, (c1 - c2) / 2) + ' = 0');
+    return {
+      level: 8, eqs, sols, mode: 'two',
+      named: pts => {
+        const xs = pts.map(p => p[0]);
+        if (xs.every(x => isInt(x) && roots.has(Math.round(x))) && new Set(xs).size === 2)
+          return `Your ${m('<i>x</i>')}-values are right. Substitute each one into either equation (try ${m(up.html)}) to find its ${m('<i>y</i>')}-value.`;
+        if (xs.every(x => isInt(x) && roots.has(-Math.round(x))) && new Set(xs).size === 2 && r1 !== -r2)
+          return signsMsg(xs.some(x => near(x, -r1)) ? r1 : r2);
+        if (b1 !== b2) { const lin = -(c1 - c2) / (b1 - b2);
+          if (!roots.has(lin) && xs.some(x => near(x, lin))) return `When you move ${m(MINUS + '<i>x</i><sup>2</sup>')} to the other side, it becomes ${m('+<i>x</i><sup>2</sup>')}. The ${m('<i>x</i><sup>2</sup>')}-terms don't cancel: ${m('<i>x</i><sup>2</sup> ' + MINUS + ' (' + MINUS + '<i>x</i><sup>2</sup>) = 2<i>x</i><sup>2</sup>')}.`; }
+        const right = pts.filter(p => sols.some(s => samePt(s, p)));
+        if (right.length === 1) {
+          const wrong = pts.find(p => !sols.some(s => samePt(s, p)));
+          return `${fmtPt(right[0])} is one of the solutions. ${(wrong && substitutionNote(eqs, wrong)) || 'Check your other point in both equations.'}`;
+        }
+        return null;
+      },
+      setup: () => `Set them equal: ${setEq}. Move every term to the left side: ${zero2}. Divide both sides by 2, then factor.`,
+      solution: () => `<ol class="steps">
+        <li>Set the equations equal: ${setEq}</li>
+        <li>Move every term to the left side: ${zero2}</li>
+        <li>Divide both sides by 2: ${zero1}</li>
+        <li>Factor: ${m(factorHTML(r1) + factorHTML(r2) + ' = 0')}, so ${m('<i>x</i> = ' + fmt(r1))} or ${m('<i>x</i> = ' + fmt(r2))}</li>
+        <li>Find each ${m('<i>y</i>')} from ${m(up.html)}: ${m('<i>y</i> = ' + subExpr([[1, 'x2'], [b1, 'x'], [c1, '']], r1, 0) + ' = ' + fmt(ys[0]))} and ${m('<i>y</i> = ' + subExpr([[1, 'x2'], [b1, 'x'], [c1, '']], r2, 0) + ' = ' + fmt(ys[1]))}</li>
+        <li>Solutions: ${fmtPt(sols[0])} and ${fmtPt(sols[1])}</li></ol>`
+    };
+  }
+}
+
+function intRoots(a, b, c) { // integer roots of ax² + bx + c = 0, or null
+  if (a === 0) return b !== 0 && isInt(-c / b) ? [-c / b] : null;
+  const d = b * b - 4 * a * c; if (d < 0) return null;
+  const t1 = (-b + Math.sqrt(d)) / (2 * a), t2 = (-b - Math.sqrt(d)) / (2 * a);
+  return isInt(t1) && isInt(t2) ? [Math.round(t1), Math.round(t2)] : null;
+}
+function genL10() {
+  for (;;) {
+    const sgn = Math.random() < 0.5 ? 1 : -1;     // other parabola: x² (combine to x²) or −x² (combine to 3x²)
+    const lead = 2 - sgn;                          // 1 or 3
+    const r1 = R(-5, 5), r2 = R(-5, 5);
+    if (r1 === r2) continue;
+    if ((r1 === 0 || r2 === 0) && Math.random() < 0.6) continue;
+    const b1 = R(-8, 8), c1 = R(-9, 9);
+    const b2 = b1 + lead * (r1 + r2), c2 = c1 - lead * r1 * r2;   // (2x² + b1x + c1) − (sgn·x² + b2x + c2) = lead(x − r1)(x − r2)
+    if (Math.abs(b2) > 16 || Math.abs(c2) > 40) continue;
+    const g = x => sgn * x * x + b2 * x + c2;
+    const ys = [g(r1), g(r2)];
+    if (ys.some(v => Math.abs(v) > 60)) continue;
+    const two = mkLin([[1, 'y']], [[2, 'x2'], [b1, 'x'], [c1, '']]);
+    const one = mkLin([[1, 'y']], [[sgn, 'x2'], [b2, 'x'], [c2, '']]);
+    const eqs = Math.random() < 0.5 ? [two, one] : [one, two];
+    const sols = [[r1, ys[0]], [r2, ys[1]]];
+    const roots = new Set([r1, r2]);
+    const setEq = m(`${quadHTML(2, b1, c1)} = ${quadHTML(sgn, b2, c2)}`);
+    const zeroL = m(quadHTML(lead, b1 - b2, c1 - c2) + ' = 0');
+    const zero1 = m(quadHTML(1, (b1 - b2) / lead, (c1 - c2) / lead) + ' = 0');
+    const sq = '<i>x</i><sup>2</sup>';
+    return {
+      level: 9, eqs, sols, mode: 'two', lead,
+      named: pts => {
+        const xs = pts.map(p => p[0]);
+        const both = f => xs.every(x => isInt(x) && f(Math.round(x))) && new Set(xs).size === 2;
+        if (both(x => roots.has(x))) return `Your ${m('<i>x</i>')}-values are right. Substitute each one into either equation (try ${m(one.html)}) to find its ${m('<i>y</i>')}-value.`;
+        if (r1 !== -r2 && both(x => roots.has(-x))) return signsMsg(xs.some(x => near(x, -r1)) ? r1 : r2);
+        const added = intRoots(2 + sgn, b1 + b2, c1 + c2);
+        if (added && xs.some(x => added.some(t => near(x, t)) && !roots.has(Math.round(x))))
+          return `It looks like you added the equations' terms. When you move the terms from ${m(one.html)} to the other side, subtract them: every sign changes.`;
+        if (sgn === -1) {
+          const xsq = intRoots(1, b1 - b2, c1 - c2);
+          if (xsq && xs.some(x => xsq.some(t => near(x, t)) && !roots.has(Math.round(x))))
+            return `Watch the ${m(sq)}-terms: ${m(`2${sq} ${MINUS} (${MINUS}${sq}) = 3${sq}`)}, not ${m(sq)}. Subtracting a negative is the same as adding.`;
+        } else {
+          const tri = intRoots(3, b1 - b2, c1 - c2);
+          if (tri && xs.some(x => tri.some(t => near(x, t)) && !roots.has(Math.round(x))))
+            return `Watch the ${m(sq)}-terms: ${m(`2${sq} ${MINUS} ${sq} = ${sq}`)}, not ${m('3' + sq)}.`;
+        }
+        const right = pts.filter(p => sols.some(s => samePt(s, p)));
+        if (right.length === 1) {
+          const wrong = pts.find(p => !sols.some(s => samePt(s, p)));
+          return `${fmtPt(right[0])} is one of the solutions. ${(wrong && substitutionNote(eqs, wrong)) || 'Check your other point in both equations.'}`;
+        }
+        return null;
+      },
+      setup: () => `Set them equal: ${setEq}. Move every term to the ${m('2' + sq)} side: ${zeroL}.${lead === 3 ? ' Every coefficient is divisible by 3: divide both sides by 3,' : ''} Then factor.`,
+      solution: () => `<ol class="steps">
+        <li>Set the equations equal: ${setEq}</li>
+        <li>Move every term to the left side. The ${m(sq)}-terms combine to ${m(`2${sq} ${MINUS} ${sgn === 1 ? sq : `(${MINUS}${sq})`} = ${lead === 1 ? '' : 3}${sq}`)}: ${zeroL}</li>
+        ${lead === 3 ? `<li>Every coefficient is divisible by 3. Divide both sides by 3: ${zero1}</li>` : ''}
+        <li>Factor: ${m(factorHTML(r1) + factorHTML(r2) + ' = 0')}, so ${m('<i>x</i> = ' + fmt(r1))} or ${m('<i>x</i> = ' + fmt(r2))}</li>
+        <li>Find each ${m('<i>y</i>')} from ${m(one.html)}: ${m('<i>y</i> = ' + subExpr([[sgn, 'x2'], [b2, 'x'], [c2, '']], r1, 0) + ' = ' + fmt(ys[0]))} and ${m('<i>y</i> = ' + subExpr([[sgn, 'x2'], [b2, 'x'], [c2, '']], r2, 0) + ' = ' + fmt(ys[1]))}</li>
+        <li>Solutions: ${fmtPt(sols[0])} and ${fmtPt(sols[1])}</li></ol>`
+    };
+  }
+}
+
+/* ---------- shared feedback pieces ---------- */
+function swappedMsg(x0, y0) {
+  return `You have the right numbers in the wrong order. A point is written (${m('<i>x</i>')}, ${m('<i>y</i>')}): the ${m('<i>x</i>')}-value comes first.`;
+}
+function namedGraph(eqs, curves, sols, pts) {
+  const pois = poisFor(curves, sols);
+  if (pts.length !== sols.length) {
+    const right = pts.filter(p => sols.some(s => samePt(s, p)));
+    const shape = curves[0].type === 'circle' ? 'circle' : 'parabola';
+    if (pts.length < sols.length && right.length === pts.length) return `${fmtPt(right[0])} is one solution. The graphs cross in one more place: add a second point.`;
+    if (pts.length > sols.length && right.length >= 1) return `${fmtPt(right[0])} is right, but the line only touches the ${shape} at one point (it's tangent there), so there is just one solution.`;
+  }
+  for (const p of pts) {
+    if (sols.some(s => samePt(s, p))) continue;
+    const swapped = sols.find(s => near(s[0], p[1]) && near(s[1], p[0]) && !near(s[0], s[1]));
+    if (swapped) return swappedMsg(swapped[0], swapped[1]);
+    const poi = pois.find(o => !o.sol && near(o.x, p[0]) && near(o.y, p[1]));
+    if (poi) return `${fmtPt(p)} is ${poi.tag}. A solution is a point where the two graphs cross each other.`;
+    const onOne = eqs.map(q => q.holds(p[0], p[1]));
+    if (onOne[0] !== onOne[1]) {
+      const yes = onOne[0] ? 0 : 1, no = 1 - yes;
+      return `${fmtPt(p)} is on the ${curves[yes].colorName} ${curveName(curves[yes])} but not the ${curves[no].colorName} ${curveName(curves[no])}. A solution has to be on both graphs.`;
+    }
+    const close = sols.find(s => Math.abs(s[0] - p[0]) + Math.abs(s[1] - p[1]) <= 1.0001);
+    if (close) return `Close! Count the grid squares again: one of your coordinates is off by 1. ${substitutionNote(eqs, p) || ''}`;
+  }
+  return null;
+}
+function solutionGraph(eqs, sols, what) {
+  const pts = sols.map(fmtPt).join(' and ');
+  const checks = sols.map(s => `<li>${fmtPt(s)}: ${eqs.map(q => q.kind === 'circle' ? m(`${binom('x', s[0], q.h)}<sup>2</sup> + ${binom('y', s[1], q.k)}<sup>2</sup> = ${q.r2}`) : q.verify(s[0], s[1])).join(' and ')} ✓</li>`).join('');
+  const lead = sols.length === 1
+    ? (what === 'lines' ? `The lines cross at ${pts}.` : `The line touches the ${what} at exactly one point, ${pts}.`)
+    : `The graphs cross at ${pts}.`;
+  return `<p>${lead}</p><p>Check in both equations:</p><ul class="steps">${checks}</ul>`;
+}
+
+const GEN = [genL1, genL2, genL3, genL4, genL5, genL6, genL7, genL8, genL9, genL10];
+
+const RULES = [
+  `<p>The solution of a system is the point that makes <b>both</b> equations true. On a graph, that's where the lines cross.</p>
+   <p>Write it as an ordered pair (${m('<i>x</i>')}, ${m('<i>y</i>')}): ${m('<i>x</i>')} first, then ${m('<i>y</i>')}. Tap a point on the graph to see its coordinates.</p>`,
+  `<p>Every point where the graphs cross is a solution. A line can cross a circle or parabola at <b>two</b> points, touch it at exactly <b>one</b> point (tangent), or miss it.</p>
+   <p>Enter one point per box. Use "Add a second point" when the graphs cross twice.</p>`,
+  `<p><b>Substitution.</b> When both equations are solved for ${m('<i>y</i>')}:</p>
+   <ol><li>Set the right sides equal to each other.</li><li>Solve for ${m('<i>x</i>')}.</li><li>Substitute ${m('<i>x</i>')} into either equation to find ${m('<i>y</i>')}.</li><li>Check the point in the other equation.</li></ol>`,
+  `<p><b>Elimination.</b> Line up the ${m('<i>x</i>')}-terms, ${m('<i>y</i>')}-terms, and constants.</p>
+   <ol><li>If a pair of coefficients are <b>opposites</b> (like ${m('4<i>y</i>')} and ${m(MINUS + '4<i>y</i>')}), <b>add</b> the equations.</li>
+   <li>If a pair of coefficients are the <b>same</b> (like ${m('3<i>x</i>')} and ${m('3<i>x</i>')}), <b>subtract</b> one equation from the other: every term, including the constant.</li>
+   <li>Solve for the variable that's left, then substitute it back to find the other one.</li></ol>`,
+  `<p><b>Multiply both equations.</b></p>
+   <ol><li>Pick a variable to eliminate. Find the least common multiple of its two coefficients (for ${m('3<i>x</i>')} and ${m('2<i>x</i>')}, that's 6).</li>
+   <li>Multiply <b>every term on both sides</b> of each equation so those coefficients become opposites (like ${m('6<i>x</i>')} and ${m(MINUS + '6<i>x</i>')}).</li>
+   <li>Add the equations, solve, then substitute back.</li></ol>`,
+  `<p>Solve the system with substitution or elimination. If <b>both</b> variables cancel, look at what's left:</p>
+   <ol><li>A <b>false</b> statement (like ${m('0 = 7')}): the lines are parallel and never cross. <b>No solution.</b></li>
+   <li>A <b>true</b> statement (like ${m('0 = 0')}): both equations are the same line. <b>Infinitely many solutions.</b></li></ol>
+   <p>Shortcut: same slope and different ${m('<i>y</i>')}-intercepts means no solution; same slope and same ${m('<i>y</i>')}-intercept means infinitely many.</p>`,
+  `<p><b>A line and a quadratic.</b></p>
+   <ol><li>Set the quadratic equal to the line.</li><li>Move the line's terms to the quadratic side (change their signs) so the other side is 0.</li>
+   <li>Factor and set each factor equal to 0 to find the two ${m('<i>x</i>')}-values.</li><li>Substitute each ${m('<i>x</i>')} into the line to find its ${m('<i>y</i>')}.</li></ol>`,
+  `<p><b>One solution or two?</b> Solve the same way as Level 7: set equal, move the line's terms so one side is 0, and factor.</p>
+   <ol><li>Two different factors give two ${m('<i>x</i>')}-values: the line crosses the parabola twice.</li>
+   <li>A perfect square, like ${m('(<i>x</i> ' + MINUS + ' 3)<sup>2</sup> = 0')}, gives only one ${m('<i>x</i>')}-value: the line is <b>tangent</b> and touches the parabola once.</li>
+   <li>Substitute each ${m('<i>x</i>')} into the line to find ${m('<i>y</i>')}.</li></ol>`,
+  `<p><b>Two quadratics.</b></p>
+   <ol><li>Set the two quadratics equal.</li>
+   <li>Move every term to one side. Watch the ${m('<i>x</i><sup>2</sup>')}-terms: ${m('<i>x</i><sup>2</sup> ' + MINUS + ' (' + MINUS + '<i>x</i><sup>2</sup>) = 2<i>x</i><sup>2</sup>')}.</li>
+   <li>Divide by the common factor (2), then factor and set each factor equal to 0.</li>
+   <li>Substitute each ${m('<i>x</i>')} into either equation to find its ${m('<i>y</i>')}.</li></ol>`,
+  `<p><b>Parabolas with ${m('2<i>x</i><sup>2</sup>')}.</b></p>
+   <ol><li>Set the two quadratics equal.</li>
+   <li>Move every term to the ${m('2<i>x</i><sup>2</sup>')} side. Combine the ${m('<i>x</i><sup>2</sup>')}-terms carefully: ${m('2<i>x</i><sup>2</sup> ' + MINUS + ' <i>x</i><sup>2</sup> = <i>x</i><sup>2</sup>')}, but ${m('2<i>x</i><sup>2</sup> ' + MINUS + ' (' + MINUS + '<i>x</i><sup>2</sup>) = 3<i>x</i><sup>2</sup>')}.</li>
+   <li>If every coefficient is divisible by 3, divide both sides by 3.</li>
+   <li>Factor, set each factor equal to 0, and substitute each ${m('<i>x</i>')} into either equation to find its ${m('<i>y</i>')}.</li></ol>`
+];
+
+/* =====================================================================
+   State and storage
+   ===================================================================== */
+const NL = LEVELS.length;
+let state = { done: Array(NL).fill(false), correct: Array(NL).fill(0), level: 0, finished: false };
+function load() {
+  try { const s = JSON.parse(localStorage.getItem(SETTINGS.storageKey) || 'null');
+    if (s && Array.isArray(s.done)) { state.done = LEVELS.map((_, i) => !!s.done[i]); state.correct = LEVELS.map((_, i) => +s.correct?.[i] || 0); state.level = Math.min(Math.max(0, +s.level || 0), NL - 1); state.finished = state.done[NL - 1]; }
+  } catch (e) {}
+}
+function save() { try { localStorage.setItem(SETTINGS.storageKey, JSON.stringify(state)); } catch (e) {} }
+let preview = false;
+const unlocked = i => preview || i === 0 || state.done[i - 1];
+
+/* per-problem state */
+let noParens = false;
+let P = null, tries = 0, locked = false, revealed = false, twoBoxes = false, choice = null, lastFocus = null;
+let screen = 'level';  // 'level' | 'intro' | 'final'
+let shown = new Set();  // graph points whose coordinates are showing
+
+function newProblem() {
+  P = GEN[state.level]();
+  tries = 0; locked = false; revealed = false; twoBoxes = false; choice = null; shown = new Set();
+}
+
+/* =====================================================================
+   Rendering
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const LOCK = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="currentColor"/><path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
+const CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function renderHeader() {
+  const nav = $('#levels');
+  nav.innerHTML = LEVELS.map((L, i) => {
+    const cls = [state.done[i] ? 'done' : '', (screen === 'level' && i === state.level) ? 'cur' : '', unlocked(i) ? '' : 'locked'].join(' ');
+    const inner = !unlocked(i) ? LOCK : (state.done[i] && !(screen === 'level' && i === state.level)) ? CHECK : (i + 1);
+    return `<div class="lv"><button class="${cls}" data-lv="${i}" aria-label="Level ${i + 1}: ${L.name}${state.done[i] ? ', finished' : unlocked(i) ? '' : ', locked'}" title="Level ${i + 1}: ${L.name}" ${unlocked(i) ? '' : 'aria-disabled="true"'}>${inner}</button></div>`;
+  }).join('') + (state.finished ? `<div class="lv" style="margin-left:.8rem"><button class="final-link" id="toFinal" style="width:auto;height:auto;border-radius:999px">Final page</button></div>` : '');
+  nav.querySelectorAll('[data-lv]').forEach(b => b.onclick = () => {
+    const i = +b.dataset.lv; if (!unlocked(i)) return;
+    state.level = i; save(); screen = 'level'; newProblem(); render();
+  });
+  const tf = $('#toFinal'); if (tf) tf.onclick = () => { screen = 'final'; render(); fireworks(SETTINGS.finalFireworksMs, true); };
+  const cur = nav.querySelector('.cur'); if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+
+function render() {
+  renderHeader();
+  const main = $('#main');
+  document.querySelectorAll('.final').forEach(n => n.remove());
+  if (screen === 'intro') return renderIntro(main);
+  if (screen === 'final') return renderFinal();
+  const i = state.level, need = SETTINGS.need[i];
+  const dots = Array.from({ length: need }, (_, k) => `<span class="dot ${k < Math.min(state.correct[i], need) ? 'on' : ''}"></span>`).join('');
+  const hasGraph = !!P.curves;
+  main.innerHTML = `
+    <div class="lvl-head"><h2>Level ${i + 1}: ${LEVELS[i].name}</h2>
+      <div class="progress">${state.done[i] ? 'Level finished. Practice as much as you like.' : `First-try correct: ${Math.min(state.correct[i], need)} of ${need}`}<span class="dots" aria-hidden="true">${dots}</span></div></div>
+    <p class="instr">${LEVELS[i].instr}</p>
+    <div class="work ${hasGraph ? 'has-graph' : ''}">
+      ${hasGraph ? `<div class="panel graph-panel"><div class="graph-wrap" id="graphWrap"></div><p class="graph-tip">Tap a crossing point or intercept to see its coordinates.</p></div>` : ''}
+      <div class="${hasGraph ? '' : 'algebra'}">
+        <div class="panel">
+          <div class="eqs">${P.eqs.map(q => `<div class="eqrow">${q.color ? `<span class="swatch" style="background:var(--c${q.color})" aria-label="${q.color}"></span>` : ''}<span class="eq">${q.html}</span></div>`).join('')}</div>
+          <div id="answers"></div>
+          <button class="check" id="checkBtn">Check my answer</button>
+          <p class="tip">Type a point like ${m('(3, ' + MINUS + '2)')}. Press Enter to check.</p>
+          <div class="keypad" id="keypad">${['7','8','9','(','4','5','6',')','1','2','3',',',MINUS,'0','/','⌫'].map(k => `<button type="button" data-k="${k}" aria-label="${k === '⌫' ? 'Backspace' : k === MINUS ? 'Negative sign' : k}">${k}</button>`).join('')}</div>
+          <div class="fb" id="fb" role="status"></div>
+          <div class="actions" id="actions"></div>
+        </div>
+        <details class="rule" id="rule"><summary>Show the method</summary><div class="rbody">${RULES[i]}</div></details>
+      </div>
+    </div>`;
+  if (hasGraph) drawGraph($('#graphWrap'));
+  renderAnswers();
+  $('#checkBtn').onclick = check;
+  $('#keypad').querySelectorAll('button').forEach(b => {
+    b.addEventListener('pointerdown', ev => ev.preventDefault());
+    b.onclick = () => keypress(b.dataset.k);
+  });
+  if (locked) $('#checkBtn').hidden = true;
+}
+
+function renderAnswers() {
+  const box = $('#answers'), dis = locked ? 'disabled' : '';
+  const coarse = matchMedia('(pointer: coarse)').matches;
+  const inp = (id, label) => `<div class="ans-row"><label for="${id}">${label}</label><input class="pt" id="${id}" autocomplete="off" autocapitalize="off" spellcheck="false" ${coarse ? 'inputmode="none"' : ''} ${dis} aria-label="${label}"></div>`;
+  if (P.mode === 'one') box.innerHTML = `<div class="answers">${inp('a1', 'Solution')}</div>`;
+  else if (P.mode === 'two') box.innerHTML = `<div class="answers">${inp('a1', 'First point')}${inp('a2', 'Second point')}</div>`;
+  else if (P.mode === 'oneOrTwo') {
+    box.innerHTML = `<div class="answers">${inp('a1', twoBoxes ? 'First point' : 'Solution')}${twoBoxes ? inp('a2', 'Second point') : ''}
+      <div><button type="button" class="linkbtn" id="toggle2" ${dis}>${twoBoxes ? 'Remove the second point' : 'Add a second point'}</button></div></div>`;
+    $('#toggle2').onclick = () => { const v1 = $('#a1').value; twoBoxes = !twoBoxes; renderAnswers(); $('#a1').value = v1; (twoBoxes ? $('#a2') : $('#a1')).focus(); };
+  } else {
+    const opts = [['one', 'One solution'], ['none', 'No solution'], ['inf', 'Infinitely many solutions']];
+    box.innerHTML = `<div class="choices" role="group" aria-label="Number of solutions">${opts.map(([k, t]) => `<button type="button" class="choice" data-c="${k}" aria-pressed="${choice === k}" ${dis}>${t}</button>`).join('')}</div>
+      ${choice === 'one' ? `<div class="answers" style="margin-top:.6rem">${inp('a1', 'Solution')}</div>` : ''}`;
+    box.querySelectorAll('.choice').forEach(b => b.onclick = () => { choice = b.dataset.c; renderAnswers(); if (choice === 'one') $('#a1').focus(); });
+    $('#keypad') && ($('#keypad').hidden = choice !== 'one');
+    const tipEl = document.querySelector('.tip'); if (tipEl) tipEl.hidden = choice !== 'one';
+  }
+  box.querySelectorAll('input.pt').forEach(el => {
+    el.addEventListener('focus', () => lastFocus = el);
+    el.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); check(); } });
+  });
+  lastFocus = box.querySelector('input.pt');
+}
+
+function keypress(k) {
+  if (locked) return;
+  const el = (lastFocus && document.body.contains(lastFocus)) ? lastFocus : document.querySelector('input.pt');
+  if (!el) return;
+  const s = el.selectionStart ?? el.value.length, e = el.selectionEnd ?? el.value.length;
+  if (k === '⌫') {
+    if (s === e && s > 0) { el.value = el.value.slice(0, s - 1) + el.value.slice(e); el.setSelectionRange(s - 1, s - 1); }
+    else { el.value = el.value.slice(0, s) + el.value.slice(e); el.setSelectionRange(s, s); }
+  } else {
+    const ch = k === ',' ? ', ' : k;
+    el.value = el.value.slice(0, s) + ch + el.value.slice(e); el.setSelectionRange(s + ch.length, s + ch.length);
+  }
+  el.focus();
+}
+
+/* ---------- graph ---------- */
+function drawGraph(wrap) {
+  const N = SETTINGS.graphRange, S = 440, u = S / (2 * N);
+  const X = x => (x + N) * u, Y = y => (N - y) * u;
+  let g = '';
+  for (let i = -N; i <= N; i++) {
+    const c = i % 2 === 0 ? 'var(--grid2)' : 'var(--grid)';
+    if (i !== 0) g += `<line x1="${X(i)}" y1="0" x2="${X(i)}" y2="${S}" stroke="${c}" stroke-width="1"/><line x1="0" y1="${Y(i)}" x2="${S}" y2="${Y(i)}" stroke="${c}" stroke-width="1"/>`;
+  }
+  g += `<line x1="${X(0)}" y1="0" x2="${X(0)}" y2="${S}" stroke="var(--axis)" stroke-width="1.6"/><line x1="0" y1="${Y(0)}" x2="${S}" y2="${Y(0)}" stroke="var(--axis)" stroke-width="1.6"/>`;
+  let labels = '';
+  for (let i = -N + 2; i <= N - 2; i += 2) {
+    if (i === 0) continue;
+    labels += `<text x="${X(i)}" y="${Y(0) + 14}" text-anchor="middle" class="ax">${coordLabel(i)}</text>`;
+    labels += `<text x="${X(0) - 5}" y="${Y(i) + 4}" text-anchor="end" class="ax">${coordLabel(i)}</text>`;
+  }
+  labels += `<text x="${X(0) - 5}" y="${Y(0) + 14}" text-anchor="end" class="ax">0</text>`;
+  let curves = '';
+  for (const c of P.curves) {
+    const col = `var(--c${c.colorName})`;
+    if (c.type === 'line') {
+      if (c.B !== 0) { const y1 = (c.C - c.A * (-N - 1)) / c.B, y2 = (c.C - c.A * (N + 1)) / c.B; curves += `<line x1="${X(-N - 1)}" y1="${Y(y1)}" x2="${X(N + 1)}" y2="${Y(y2)}" stroke="${col}" stroke-width="4" stroke-linecap="round"/>`; }
+      else { const x = c.C / c.A; curves += `<line x1="${X(x)}" y1="${-10}" x2="${X(x)}" y2="${S + 10}" stroke="${col}" stroke-width="4"/>`; }
+    } else if (c.type === 'circle') {
+      curves += `<circle cx="${X(c.h)}" cy="${Y(c.k)}" r="${Math.sqrt(c.r2) * u}" fill="none" stroke="${col}" stroke-width="4"/>`;
+    } else {
+      let d = '';
+      for (let j = 0; j <= 600; j++) { const x = -N - 0.5 + j * (2 * N + 1) / 600; let y = c.a * x * x + c.b * x + c.c; y = Math.max(-60, Math.min(60, y)); d += (j ? 'L' : 'M') + X(x).toFixed(2) + ' ' + Y(y).toFixed(2); }
+      curves += `<path d="${d}" fill="none" stroke="${col}" stroke-width="4" stroke-linejoin="round"/>`;
+    }
+  }
+  let pois = '';
+  P.pois.forEach((o, idx) => {
+    pois += `<circle cx="${X(o.x)}" cy="${Y(o.y)}" r="5" fill="var(--poi)" stroke="var(--halo)" stroke-width="1.5" class="poi" data-i="${idx}"/>`;
+  });
+  wrap.innerHTML = `<svg class="graph" viewBox="0 0 ${S} ${S}" role="img" aria-label="Graph of the system. Tap a point to show its coordinates.">
+    <style>.ax{font:12px "Atkinson Hyperlegible",system-ui,sans-serif;fill:var(--axis)} .lbl{font:600 15px "STIX Two Text",serif;fill:var(--ink);paint-order:stroke;stroke:var(--halo);stroke-width:4px;stroke-linejoin:round}</style>
+    <defs><clipPath id="clipG"><rect x="0" y="0" width="${S}" height="${S}"/></clipPath></defs>
+    <g>${g}</g>${labels}<g clip-path="url(#clipG)">${curves}</g><g>${pois}</g><g id="labels"></g></svg>`;
+  const svg = wrap.querySelector('svg');
+  const drawLabels = () => {
+    let t = '';
+    shown.forEach(idx => {
+      const o = P.pois[idx]; const px = X(o.x), py = Y(o.y);
+      const txt = `(${coordLabel(o.x)}, ${coordLabel(o.y)})`;
+      const right = px < S - 120, up = py > 30;
+      t += `<circle cx="${px}" cy="${py}" r="6.5" fill="var(--axis)" stroke="var(--halo)" stroke-width="2"/>`;
+      t += `<text class="lbl" x="${right ? px + 10 : px - 10}" y="${up ? py - 10 : py + 22}" text-anchor="${right ? 'start' : 'end'}">${txt}</text>`;
+    });
+    svg.querySelector('#labels').innerHTML = t;
+  };
+  drawLabels();
+  svg.addEventListener('pointerdown', ev => {
+    const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+    let best = -1, bd = 1e9;
+    P.pois.forEach((o, idx) => { const d = Math.hypot(X(o.x) - loc.x, Y(o.y) - loc.y); if (d < bd) { bd = d; best = idx; } });
+    const tol = Math.max(16, 22 * S / svg.getBoundingClientRect().width);
+    if (best >= 0 && bd <= tol) { shown.has(best) ? shown.delete(best) : shown.add(best); drawLabels(); }
+  });
+}
+
+/* ---------- checking ---------- */
+function setFB(cls, html) { const fb = $('#fb'); fb.className = 'fb ' + cls; fb.innerHTML = html; $('#live').textContent = fb.textContent; }
+function readPoints() {
+  const ids = P.mode === 'two' ? ['a1', 'a2'] : P.mode === 'oneOrTwo' && twoBoxes ? ['a1', 'a2'] : ['a1'];
+  const out = [];
+  for (const id of ids) { const el = $('#' + id); out.push(parsePoint(el ? el.value : '')); }
+  return out;
+}
+function parensTip() {
+  return noParens ? `<p>One tip for next time: write points with parentheses, like ${m('(3, ' + MINUS + '2)')}. Leaving them off didn't count against you.</p>` : '';
+}
+function freeMsg(text) { setFB('free', `<p class="lead">Almost…</p><p>${text}</p><p>This didn't count against you.</p>`); }
+
+function check() {
+  if (locked) return;
+  let pts = null, correct = false;
+  noParens = false;
+  if (P.mode === 'special') {
+    if (!choice) return freeMsg('Choose one of the three answers first.');
+    if (choice === 'one') {
+      const r = readPoints()[0];
+      if (r.status === 'empty') return freeMsg('Type the point you found, or choose a different answer.');
+      if (r.status === 'single' || r.status === 'bad') return freeMsg(`Type the solution as a point, like ${m('(3, ' + MINUS + '2)')}.`);
+      if (r.status === 'noparens') noParens = true;
+      pts = [[r.x, r.y]];
+    }
+    correct = choice === P.special;
+  } else {
+    const rs = readPoints();
+    if (rs.some(r => r.status === 'empty')) {
+      if (rs.every(r => r.status === 'empty')) return freeMsg(`Type your answer as a point, like ${m('(3, ' + MINUS + '2)')}.`);
+      return freeMsg(P.mode === 'two' ? 'Fill in both points. This system has two solutions.' : 'One of the point boxes is empty. Fill it in or remove it.');
+    }
+    if (rs.some(r => r.status === 'single')) return freeMsg(`Your answer needs both coordinates. Write it as a point (${m('<i>x</i>')}, ${m('<i>y</i>')}), like ${m('(3, ' + MINUS + '2)')}.`);
+    if (rs.some(r => r.status === 'bad')) return freeMsg(`I can't read that point. Type it like ${m('(3, ' + MINUS + '2)')}: parentheses, the ${m('<i>x</i>')}-value, a comma, then the ${m('<i>y</i>')}-value.`);
+    if (rs.some(r => r.status === 'noparens')) noParens = true;
+    pts = rs.map(r => [r.x, r.y]);
+    if (pts.length === 2 && samePt(pts[0], pts[1])) {
+      return miss(`Your two points are the same. ${P.sols.length === 2 ? 'The graphs cross at two different points.' : 'If the graphs cross only once, remove the second point.'}`);
+    }
+    correct = pts.length === P.sols.length && P.sols.every(s => pts.some(p => samePt(s, p)));
+  }
+  if (correct) return hit();
+  let msg = P.named(pts, choice);
+  if (!msg && pts) for (const p of pts) { if (!P.sols.some(s => samePt(s, p))) { msg = substitutionNote(P.eqs, p); if (msg) break; } }
+  if (!msg) msg = 'That isn\'t the solution. Check your point in both equations.';
+  miss(msg);
+}
+
+function lockProblem() {
+  locked = true;
+  document.querySelectorAll('#answers input, #answers button').forEach(el => el.disabled = true);
+  $('#checkBtn').hidden = true;
+}
+function hit() {
+  const i = state.level, need = SETTINGS.need[i];
+  const counts = tries === 0 && !revealed || !SETTINGS.firstTryOnly && !revealed;
+  lockProblem();
+  let html;
+  const wasDone = state.done[i];
+  if (counts && !wasDone) state.correct[i]++;
+  if (wasDone) html = `<p class="lead">Correct!</p><p>${tries ? 'Nice fix.' : 'Nice work.'}</p>`;
+  else if (counts) html = `<p class="lead">Correct!</p><p>${state.correct[i] >= need ? 'That clears the level.' : `${need - state.correct[i]} more first-try answer${need - state.correct[i] === 1 ? '' : 's'} to clear this level.`}</p>`;
+  else html = `<p class="lead">Correct! Nice fix.</p><p>Only first-try answers count toward leveling up, so this one didn't count. You still need ${need - state.correct[i]} more.</p>`;
+  if (!wasDone && state.correct[i] >= need) { state.done[i] = true; if (i === NL - 1) state.finished = true; }
+  save();
+  setFB('good', html + parensTip());
+  showActions(state.done[i] && !wasDone);
+  renderHeader();
+  const prog = document.querySelector('.progress');
+  if (prog) { const d = Array.from({ length: need }, (_, k) => `<span class="dot ${k < Math.min(state.correct[i], need) ? 'on' : ''}"></span>`).join('');
+    prog.innerHTML = (state.done[i] ? 'Level finished. Practice as much as you like.' : `First-try correct: ${Math.min(state.correct[i], need)} of ${need}`) + `<span class="dots" aria-hidden="true">${d}</span>`; }
+}
+function miss(msg) {
+  tries++;
+  const left = SETTINGS.triesBeforeReveal - tries;
+  if (left <= 0) {
+    revealed = true; lockProblem();
+    setFB('bad', `<p class="lead">Here's the full solution.</p>${P.solution()}<p>This problem didn't count. Try a fresh one.</p>`);
+    showActions(false);
+    return;
+  }
+  let html = `<p class="lead">Not quite.</p><p>${msg}</p>`;
+  if (tries >= 2) { html += `<div class="setup">${P.setup()}</div>`; const r = $('#rule'); if (r) r.open = true; }
+  html += `<p><b>${left} ${left === 1 ? 'try' : 'tries'} left</b> on this problem.</p>` + parensTip();
+  setFB('bad', html);
+}
+function showActions(justCleared) {
+  const i = state.level, a = $('#actions');
+  const parts = [];
+  if (state.done[i]) {
+    if (i < NL - 1) parts.push(`<button class="btn go" id="adv">Advance to Level ${i + 2}</button>`);
+    else parts.push(`<button class="btn go" id="fin">See the final page</button>`);
+    parts.push(`<button class="btn" id="nextP">Practice more at Level ${i + 1}</button>`);
+  } else parts.push(`<button class="btn go" id="nextP">Next problem</button>`);
+  a.innerHTML = parts.join('');
+  $('#nextP').onclick = () => { newProblem(); render(); const f = document.querySelector('input.pt'); if (f && !matchMedia('(pointer: coarse)').matches) f.focus(); };
+  const adv = $('#adv'); if (adv) adv.onclick = () => { screen = 'intro'; render(); fireworks(SETTINGS.introFireworksMs); };
+  const fin = $('#fin'); if (fin) fin.onclick = () => { screen = 'final'; render(); fireworks(SETTINGS.finalFireworksMs, true); };
+  (a.querySelector('.go') || a.querySelector('button')).focus({ preventScroll: true });
+}
+
+function renderIntro(main) {
+  const i = state.level;
+  main.innerHTML = `<div class="intro"><div class="card">
+    <p>You cleared Level ${i + 1}: ${LEVELS[i].short}.</p>
+    <h2>Next up: Level ${i + 2}</h2>
+    <p>${LEVELS[i + 1].name}</p>
+    <div class="actions" style="justify-content:center"><button class="btn go" id="begin">Begin Level ${i + 2}</button></div></div></div>`;
+  $('#begin').onclick = () => { state.level = i + 1; save(); screen = 'level'; newProblem(); render(); };
+  $('#begin').focus();
+}
+
+function renderFinal() {
+  const d = document.createElement('div');
+  d.className = 'final';
+  d.innerHTML = `
+    <svg viewBox="0 0 400 300" aria-hidden="true">
+      <defs><radialGradient id="glow"><stop offset="0" stop-color="#FFCB05" stop-opacity=".95"/><stop offset=".35" stop-color="#FFCB05" stop-opacity=".35"/><stop offset="1" stop-color="#FFCB05" stop-opacity="0"/></radialGradient></defs>
+      <g stroke="#1C4877" stroke-width="1">${Array.from({ length: 21 }, (_, k) => `<line x1="${k * 20}" y1="0" x2="${k * 20}" y2="300"/>`).join('')}${Array.from({ length: 16 }, (_, k) => `<line x1="0" y1="${k * 20}" x2="400" y2="${k * 20}"/>`).join('')}</g>
+      <line x1="20" y1="290" x2="380" y2="40" stroke="#F07C78" stroke-width="6" stroke-linecap="round"/>
+      <line x1="20" y1="60" x2="380" y2="270" stroke="#6EAAF2" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="200" cy="165" r="60" fill="url(#glow)"/>
+      <line x1="200" y1="165" x2="200" y2="70" stroke="#E7EEF7" stroke-width="4" stroke-linecap="round"/>
+      <path d="M202 72 L272 86 L202 102 Z" fill="#FFCB05"/>
+      <text x="230" y="92" text-anchor="middle" font-family="STIX Two Text, serif" font-style="italic" font-size="14" fill="#00274C">(x, y)</text>
+      <circle cx="200" cy="165" r="8" fill="#FFCB05" stroke="#00274C" stroke-width="2"/>
+    </svg>
+    <h2>You found the point where it all comes together.</h2>
+    <p>Lines, circles, parabolas, and parallel lines that never meet: every system you faced, you solved.</p>
+    <button class="btn" id="backLv">Back to the levels</button>`;
+  document.body.appendChild(d);
+  d.querySelector('#backLv').onclick = () => { screen = 'level'; newProblem(); render(); };
+  d.querySelector('#backLv').focus();
+}
+
+/* ---------- footer: teacher preview + start over ---------- */
+function renderFooter() {
+  const f = $('#foot');
+  f.innerHTML = `
+    <div id="resetArea"><button class="small" id="resetBtn">Start over</button></div>
+    <label><input type="checkbox" id="tp" ${preview ? 'checked' : ''}> Teacher preview</label>
+    <div id="tpArea"></div>
+    <span>Progress is saved in this browser on this device.</span>`;
+  $('#resetBtn').onclick = () => {
+    $('#resetArea').innerHTML = `<div class="confirm"><span>Erase all progress on this device?</span><button class="small danger" id="yesReset">Erase progress</button><button class="small" id="noReset">Cancel</button></div>`;
+    $('#yesReset').onclick = () => { state = { done: Array(NL).fill(false), correct: Array(NL).fill(0), level: 0, finished: false }; save(); screen = 'level'; newProblem(); render(); renderFooter(); };
+    $('#noReset').onclick = renderFooter;
+  };
+  $('#tp').onchange = ev => {
+    if (!ev.target.checked) { preview = false; renderFooter(); render(); return; }
+    $('#tpArea').innerHTML = `<input type="password" id="tpPass" placeholder="Passphrase" aria-label="Teacher passphrase"> <button class="small" id="tpGo">Unlock</button> <span id="tpMsg"></span>`;
+    const go = () => { if ($('#tpPass').value.trim().toLowerCase() === SETTINGS.passphrase) { preview = true; $('#tpArea').innerHTML = 'All levels unlocked for this visit.'; render(); } else { $('#tpMsg').textContent = 'That passphrase doesn\'t match.'; $('#tp').checked = preview; } };
+    $('#tpGo').onclick = go; $('#tpPass').onkeydown = e => { if (e.key === 'Enter') go(); }; $('#tpPass').focus();
+  };
+}
+
+/* ---------- fireworks ---------- */
+function fireworks(ms, big) {
+  const cv = $('#fx'), ctx = cv.getContext('2d');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dur = reduce ? 1200 : ms;
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; ctx.scale(dpr, dpr);
+  const cols = ['#FFCB05', '#FFFFFF', '#6EAAF2', '#F07C78', '#FFE27A'];
+  const parts = [];
+  const burst = () => {
+    const x = innerWidth * (0.15 + Math.random() * 0.7), y = innerHeight * (0.12 + Math.random() * 0.4);
+    const n = reduce ? 18 : (big ? 70 : 50), col = pick(cols);
+    for (let k = 0; k < n; k++) { const a = Math.random() * Math.PI * 2, s = (reduce ? 1.5 : 2.2) + Math.random() * (reduce ? 1.5 : 3.5); parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, col }); }
+  };
+  const start = performance.now(); let lastBurst = 0;
+  const step = now => {
+    const t = now - start;
+    if (t < dur - 900 && now - lastBurst > (reduce ? 600 : big ? 260 : 380)) { burst(); lastBurst = now; }
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of parts) { p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.vx *= 0.985; p.vy *= 0.985; p.life -= 0.013; if (p.life > 0) { ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.col; ctx.beginPath(); ctx.arc(p.x, p.y, 2.4, 0, 7); ctx.fill(); } }
+    ctx.globalAlpha = 1;
+    if (t < dur) requestAnimationFrame(step); else ctx.clearRect(0, 0, innerWidth, innerHeight);
+  };
+  requestAnimationFrame(step);
+}
+
+/* ---------- start ---------- */
+load();
+newProblem();
+render();
+renderFooter();
+</script>
+</body>
+</html>
